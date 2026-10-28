@@ -65,6 +65,27 @@
 {#if !chatState.isSnapshotMode}
   <!-- Desktop / Mobile Floating Control Bar -->
   <div class="fixed top-2 left-1/2 -translate-x-1/2 z-50 flex items-center bg-[#1e293b]/90 backdrop-blur-md text-white px-3 py-1.5 rounded-full shadow-2xl border border-white/10 space-x-2 text-[12px] font-medium transition-all max-w-[95vw] overflow-x-auto no-scrollbar">
+    <!-- App Switcher: Messenger vs Zalo -->
+    <div class="flex items-center bg-black/40 rounded-full p-0.5 border border-white/10 shrink-0">
+      <button 
+        type="button" 
+        class="flex items-center space-x-1 px-2.5 py-1 rounded-full font-bold transition-all cursor-pointer whitespace-nowrap text-[11.5px] {chatState.currentApp === 'messenger' ? 'bg-[#0084ff] text-white' : 'text-white/60 hover:text-white'}"
+        onclick={() => { chatState.currentApp = 'messenger'; }}
+        title="Chuyển sang giao diện Messenger"
+      >
+        <span>💬 Messenger</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="flex items-center space-x-1 px-2.5 py-1 rounded-full font-bold transition-all cursor-pointer whitespace-nowrap text-[11.5px] {chatState.currentApp === 'zalo' ? 'bg-[#0068ff] text-white' : 'text-white/60 hover:text-white'}"
+        onclick={() => { chatState.currentApp = 'zalo'; }}
+        title="Chuyển sang giao diện Zalo"
+      >
+        <span>💙 Zalo</span>
+      </button>
+    </div>
+
     <!-- Snapshot Mode Button -->
     <button 
       type="button"
