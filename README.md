@@ -46,6 +46,14 @@
 * Đổi màu chủ đề (Classic Blue, Ocean, Berry Pink, Sunset, Mint) & Bật/tắt chế độ tối (Dark Mode OLED).
 * Chỉnh thanh trạng thái iOS: Đồng hồ, mức pin %, đang sạc ⚡, cột sóng 5G/4G/Wifi.
 
-### 6. Giả lập Cuộc gọi thoại & Video
-* Bấm icon **Điện thoại** hoặc **Máy quay** ở góc trên phải để giả lập cuộc gọi đến (chuông reo, avatar lớn, nút nghe/từ chối).
+### 6. Thả cảm xúc tin nhắn (Reactions)
+* **Chạm giữ hoặc nhấn vào icon cảm xúc cạnh tin nhắn** để mở bảng Bottom Sheet với 6 biểu tượng nguyên bản từ APK gốc: Thích 👍, Yêu thích ❤️, Haha 😂, Wow 😮, Buồn 😢, Phẫn nộ 😡.
+* Huy hiệu cảm xúc sẽ hiển thị đè ở góc dưới tin nhắn chuẩn 1:1 Messenger.
+
+### 7. Điều hướng Đa Màn hình (Chuẩn APK 1:1)
+* Bấm nút **`<`** trên thanh tiêu đề để quay về **Màn hình chính "Đoạn chat"** (`activity_main_messenger.xml`): Xem danh sách story, thanh tìm kiếm, và chuyển đổi giữa các cuộc trò chuyện.
+* Bấm biểu tượng **Bút chì ✏️** ở góc trên phải để mở màn hình **"Tạo liên hệ giả"** (`activity_fake_contact_messenger.xml`): Nhập tên, tải ảnh đại diện, chỉnh trạng thái online và bấm **LƯU** để tạo hội thoại mới.
+
+### 8. Giả lập Cuộc gọi thoại & Video
+* Bấm icon **Điện thoại** hoặc **Máy quay** ở góc trên phải để giả lập cuộc gọi đến (chuông reo, avatar lớn, nút nghe/từ chối). Sau khi kết thúc, thời lượng cuộc gọi sẽ tự động được ghi log vào khung chat.
 * Khi nghe máy sẽ có đồng hồ đếm giây thời gian thực và tự động ghi log vào đoạn chat khi cúp máy.
