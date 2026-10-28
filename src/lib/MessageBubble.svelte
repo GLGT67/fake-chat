@@ -6,7 +6,7 @@
   const { message, isLastFromSender, isLastOverall } = $props();
 
   const conv = $derived(getActiveConversation());
-  const theme = $derived(THEMES[conv.themeKey] || THEMES.classic);
+  const theme = $derived(/** @type {any} */ (THEMES)[conv.themeKey] || THEMES.classic);
   let isPlayingVoice = $state(false);
   let showTimestamp = $state(false);
 
@@ -21,15 +21,16 @@
     showTimestamp = !showTimestamp;
   }
 
-  function handleMessageEdit(e) {
-    e.stopPropagation();
+  function handleMessageEdit(/** @type {any} */ e) {
+    if (e && e.stopPropagation) e.stopPropagation();
     chatState.editingMessageId = message.id;
     chatState.activeModal = 'edit_message';
   }
 
+  /** @type {any} */
   let pressTimer = null;
 
-  function handleTouchStart(e) {
+  function handleTouchStart(/** @type {any} */ e) {
     pressTimer = setTimeout(() => {
       handleReactionClick(e);
     }, 450);
@@ -42,7 +43,7 @@
     }
   }
 
-  function handleReactionClick(e) {
+  function handleReactionClick(/** @type {any} */ e) {
     if (e && e.stopPropagation) e.stopPropagation();
     chatState.reactingMessageId = message.id;
     chatState.activeModal = 'react';

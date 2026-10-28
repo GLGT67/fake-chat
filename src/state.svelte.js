@@ -7,6 +7,7 @@ export const DEFAULT_AVATARS = [
   "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=300&fit=crop&crop=faces"
 ];
 
+/** @type {Record<string, { id: string, name: string, primary: string, bgRight: string, textRight: string }>} */
 export const THEMES = {
   classic: {
     id: "classic",
@@ -46,12 +47,24 @@ export const chatState = $state({
   // App Theme & Mode
   isDarkMode: false,
   isSnapshotMode: false,
+  /** @type {string | null} */
   activeModal: null, // null | 'profile' | 'edit_message' | 'attach' | 'call' | 'react'
+  /** @type {string | null} */
   editingMessageId: null,
+  /** @type {string | null} */
   reactingMessageId: null,
 
   // Active Conversation Info (selected or default)
   activeContactId: "c-1",
+
+  get partnerName() {
+    const c = this.conversations.find((/** @type {any} */ item) => item.id === this.activeContactId);
+    return (c || this.conversations[0])?.name || "";
+  },
+  get partnerAvatar() {
+    const c = this.conversations.find((/** @type {any} */ item) => item.id === this.activeContactId);
+    return (c || this.conversations[0])?.avatar || "";
+  },
 
   // Contacts / Conversations List (100% like activity_main_messenger)
   conversations: [
@@ -189,12 +202,12 @@ export function getActiveConversation() {
 }
 
 // Helper actions
-export function selectConversation(id) {
+export function selectConversation(/** @type {string} */ id) {
   chatState.activeContactId = id;
   chatState.currentScreen = 'chat_room';
 }
 
-export function addConversation(data) {
+export function addConversation(/** @type {any} */ data) {
   const newId = "c-" + Date.now();
   const newConv = {
     id: newId,
@@ -224,7 +237,7 @@ export function addConversation(data) {
   chatState.currentScreen = 'chat_room';
 }
 
-export function addMessage(data) {
+export function addMessage(/** @type {any} */ data) {
   const conv = getActiveConversation();
   const newMsg = {
     id: "m-" + Date.now() + "-" + Math.random().toString(36).substr(2, 4),
@@ -243,7 +256,7 @@ export function addMessage(data) {
   conv.lastTime = newMsg.timestamp;
 }
 
-export function updateMessage(id, updates) {
+export function updateMessage(/** @type {string} */ id, /** @type {any} */ updates) {
   const conv = getActiveConversation();
   const index = conv.messages.findIndex(m => m.id === id);
   if (index !== -1) {
@@ -251,12 +264,12 @@ export function updateMessage(id, updates) {
   }
 }
 
-export function deleteMessage(id) {
+export function deleteMessage(/** @type {string} */ id) {
   const conv = getActiveConversation();
   conv.messages = conv.messages.filter(m => m.id !== id);
 }
 
-export function insertMessageAt(id, data, position = "after") {
+export function insertMessageAt(/** @type {string} */ id, /** @type {any} */ data, position = "after") {
   const conv = getActiveConversation();
   const index = conv.messages.findIndex(m => m.id === id);
   if (index === -1) return;
@@ -276,7 +289,7 @@ export function insertMessageAt(id, data, position = "after") {
   }
 }
 
-export function setReaction(msgId, reactType) {
+export function setReaction(/** @type {string} */ msgId, /** @type {string | null} */ reactType) {
   const conv = getActiveConversation();
   const msg = conv.messages.find(m => m.id === msgId);
   if (msg) {
