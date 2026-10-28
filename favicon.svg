@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="m-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00C6FF" />
+      <stop offset="50%" stop-color="#0072FF" />
+      <stop offset="100%" stop-color="#7F00FF" />
+    </linearGradient>
+  </defs>
+  <!-- Messenger Chat Bubble -->
+  <path fill="url(#m-grad)" d="M128 16C66.1 16 16 63.8 16 122.8c0 33.6 16.3 63.6 41.8 83.1v34.3c0 5.4 5.7 8.9 10.5 6.2l38.2-21.2c7.1 1.9 14.6 2.9 22.3 2.9 61.9 0 112-47.8 112-106.8S189.9 16 128 16z"/>
+  <!-- White Lightning Bolt -->
+  <path fill="#FFFFFF" d="M141.2 144.3l-28.7-30.6c-4.2-4.5-11.2-4.6-15.6-.2l-38.6 38.6c-5.8 5.8-2 15.8 6.1 16.2l30.7 1.5c4.6.2 8.9-2 11.5-5.9l24.9-37.4c4.1-6.2 13.3-6.4 17.7-.3l28.6 39.5c5.3 7.3 16.3 6.6 20.7-1.4l33.8-61.9c4.8-8.7-4.4-18.4-13.6-14.4l-66.9 28.5c-4.2 1.8-9 1-12.4-2.5z"/>
+</svg>
