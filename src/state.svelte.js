@@ -180,3 +180,4 @@ export function getCurrentFormattedTime() {
   const minutes = String(d.getMinutes()).padStart(2, '0');
   return `${hours}:${minutes}`;
 }
+

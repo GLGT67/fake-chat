@@ -84,7 +84,7 @@
       class:border-gray-100={!chatState.isDarkMode}
     >
       <div class="flex items-center space-x-2">
-        <span class="text-gray-400">Người gửi tiếp theo:</span>
+        <span class="text-gray-600 dark:text-gray-300">Người gửi tiếp theo:</span>
         <button 
           type="button" 
           class="flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full transition-all active:scale-95 shadow-2xs cursor-pointer font-bold"
@@ -105,7 +105,7 @@
 
       <button 
         type="button" 
-        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-[10px] underline cursor-pointer"
+        class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 text-[10px] underline cursor-pointer"
         onclick={toggleSender}
       >
         (Nhấn đổi)
@@ -200,3 +200,4 @@
     </div>
   </div>
 </div>
+

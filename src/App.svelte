@@ -35,6 +35,7 @@
   <div 
     id="phone-screen-frame"
     class="relative w-full h-full sm:w-[393px] sm:h-[852px] sm:max-h-[92vh] sm:rounded-[48px] sm:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] flex flex-col overflow-hidden sm:border-[8px] sm:border-[#1e293b] transition-colors duration-200"
+    class:dark={chatState.isDarkMode}
     class:bg-[#18191a]={chatState.isDarkMode}
     class:bg-white={!chatState.isDarkMode}
   >
@@ -58,8 +59,20 @@
           alt={chatState.partnerName} 
           class="w-16 h-16 rounded-full mx-auto object-cover shadow-sm mb-2 border border-black/5" 
         />
-        <h3 class="font-bold text-[17px] leading-tight text-gray-900 dark:text-white">{chatState.partnerName}</h3>
-        <p class="text-xs text-gray-400 mt-0.5">Các bạn đã kết nối trên Messenger</p>
+        <h3 
+          class="font-bold text-[17px] leading-tight"
+          class:text-white={chatState.isDarkMode}
+          class:text-gray-900={!chatState.isDarkMode}
+        >
+          {chatState.partnerName}
+        </h3>
+        <p 
+          class="text-xs mt-0.5"
+          class:text-gray-400={chatState.isDarkMode}
+          class:text-gray-500={!chatState.isDarkMode}
+        >
+          Các bạn đã kết nối trên Messenger
+        </p>
       </div>
 
       <!-- Messages List -->
