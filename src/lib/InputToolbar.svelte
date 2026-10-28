@@ -84,13 +84,13 @@
       class:border-gray-100={!chatState.isDarkMode}
     >
       <div class="flex items-center space-x-2">
-        <span class="text-gray-600 dark:text-gray-300">Người gửi tiếp theo:</span>
+        <span class="text-gray-700 dark:text-gray-300">Người gửi tiếp theo:</span>
         <button 
           type="button" 
           class="flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full transition-all active:scale-95 shadow-2xs cursor-pointer font-bold"
           class:bg-[#0084ff]={chatState.activeSender === 'me'}
           class:bg-gray-300={chatState.activeSender === 'them' && !chatState.isDarkMode}
-          class:text-gray-800={chatState.activeSender === 'them' && !chatState.isDarkMode}
+          class:text-gray-900={chatState.activeSender === 'them' && !chatState.isDarkMode}
           class:bg-gray-700={chatState.activeSender === 'them' && chatState.isDarkMode}
           class:text-white={chatState.activeSender === 'me' || (chatState.activeSender === 'them' && chatState.isDarkMode)}
           onclick={toggleSender}
@@ -105,7 +105,7 @@
 
       <button 
         type="button" 
-        class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 text-[10px] underline cursor-pointer"
+        class="text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white text-[10px] font-semibold underline cursor-pointer"
         onclick={toggleSender}
       >
         (Nhấn đổi)
