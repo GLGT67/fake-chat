@@ -14,13 +14,17 @@
       <span>{chatState.currentTime}</span>
     </div>
 
-    <!-- Center: Dynamic Island -->
-    <div class="w-[124px] h-[35px] bg-black rounded-full flex items-center justify-between px-3 shadow-sm mx-auto -mt-1.5 transition-all">
-      <div class="w-3 h-3 rounded-full bg-[#111] flex items-center justify-center">
-        <div class="w-2 h-2 rounded-full bg-[#0a1128] ring-1 ring-[#1b264f]/40"></div>
+    <!-- Center: Dynamic Island (Tùy chọn) -->
+    {#if chatState.showDynamicIsland}
+      <div class="w-[120px] h-[32px] bg-black rounded-full flex items-center justify-between px-3 shadow-xs mx-auto -mt-1 transition-all">
+        <div class="w-2.5 h-2.5 rounded-full bg-[#111] flex items-center justify-center">
+          <div class="w-1.5 h-1.5 rounded-full bg-[#0a1128] ring-1 ring-[#1b264f]/40"></div>
+        </div>
+        <div class="w-2.5 h-2.5 rounded-full bg-[#050505] ring-1 ring-[#1a1a1a]"></div>
       </div>
-      <div class="w-2.5 h-2.5 rounded-full bg-[#050505] ring-1 ring-[#1a1a1a]"></div>
-    </div>
+    {:else}
+      <div class="flex-1"></div>
+    {/if}
 
     <!-- Right: Cellular, Wifi, Battery -->
     <div class="flex items-center space-x-1.5 pr-1 text-[13px]">

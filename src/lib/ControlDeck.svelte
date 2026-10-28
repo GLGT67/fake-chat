@@ -18,17 +18,31 @@
       const wasSnapshot = chatState.isSnapshotMode;
       chatState.isSnapshotMode = true; // hide controls before capture
 
+      // Temporarily strip any border radius/border so PNG is 100% clean rectangle without any dark bezel
+      const prevRadius = node.style.borderRadius;
+      const prevBorder = node.style.border;
+      const prevShadow = node.style.boxShadow;
+      node.style.borderRadius = '0px';
+      node.style.border = 'none';
+      node.style.boxShadow = 'none';
+
       // allow DOM update
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise(r => setTimeout(r, 120));
 
       const dataUrl = await toPng(node, {
-        pixelRatio: 3, // 3x Retina resolution
-        quality: 0.98,
+        pixelRatio: 3, // 3x Retina resolution (1179 x 2556 px)
+        quality: 1,
         skipFonts: true,
+        backgroundColor: chatState.isDarkMode ? '#18191a' : '#ffffff'
       });
 
+      // Restore styling
+      node.style.borderRadius = prevRadius;
+      node.style.border = prevBorder;
+      node.style.boxShadow = prevShadow;
+
       const link = document.createElement('a');
-      link.download = `messenger_fake_${Date.now()}.png`;
+      link.download = `messenger_iphone_${Date.now()}.png`;
       link.href = dataUrl;
       link.click();
 

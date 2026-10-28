@@ -16,7 +16,7 @@
 
   const conv = $derived(getActiveConversation());
   /** @type {HTMLDivElement | undefined} */
-  let chatScrollRef = $state();
+  let ảchatScrollRef = $state();
 
   function scrollToBottom() {
     if (chatScrollRef) {
@@ -36,16 +36,33 @@
 
 <!-- Main Container -->
 <main
-  class="w-full h-[100dvh] flex items-center justify-center overflow-hidden sm:p-4 select-none"
+  class="w-full h-[100dvh] flex items-center justify-center overflow-hidden select-none transition-all"
+  class:sm:p-4={!chatState.isSnapshotMode}
+  class:p-0={chatState.isSnapshotMode}
 >
-  <!-- iPhone Realistic Frame (Full width on mobile, 400px on desktop) -->
-  <div
-    id="phone-screen-frame"
-    class="relative w-full h-full sm:w-[393px] sm:h-[852px] sm:max-h-[92vh] sm:rounded-[48px] sm:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] flex flex-col overflow-hidden sm:border-[8px] sm:border-[#1e293b] transition-colors duration-200"
-    class:dark={chatState.isDarkMode}
-    class:bg-[#18191a]={chatState.isDarkMode}
-    class:bg-white={!chatState.isDarkMode}
+  <!-- Desktop Simulator Phone Chassis (Outer Casing - Hidden in Snapshot Mode) -->
+  <div 
+    class="relative w-full h-full flex items-center justify-center transition-all"
+    class:sm:w-[397px]={!chatState.isSnapshotMode}
+    class:sm:h-[856px]={!chatState.isSnapshotMode}
+    class:sm:max-h-[92vh]={!chatState.isSnapshotMode}
+    class:sm:p-2={!chatState.isSnapshotMode}
+    class:sm:rounded-[52px]={!chatState.isSnapshotMode}
+    class:sm:bg-[#1e293b]={!chatState.isSnapshotMode}
+    class:sm:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)]={!chatState.isSnapshotMode}
   >
+    <!-- Pure Phone Screen Frame (The ACTUAL screen to capture!) -->
+    <div
+      id="phone-screen-frame"
+      class="relative w-full h-full flex flex-col overflow-hidden transition-colors duration-200 border-0"
+      class:sm:w-[393px]={chatState.isSnapshotMode}
+      class:sm:h-[852px]={chatState.isSnapshotMode}
+      class:sm:rounded-[44px]={!chatState.isSnapshotMode}
+      class:rounded-none={chatState.isSnapshotMode}
+      class:dark={chatState.isDarkMode}
+      class:bg-[#18191a]={chatState.isDarkMode}
+      class:bg-white={!chatState.isDarkMode}
+    >
     <!-- iOS Dynamic Island & Status Bar -->
     <IosStatusBar />
 
@@ -119,5 +136,6 @@
     {:else if chatState.activeModal === "call"}
       <FakeCallModal />
     {/if}
+    </div>
   </div>
 </main>

@@ -184,6 +184,7 @@ export const chatState = $state({
   wifiEnabled: true,
   cellularType: "5G",
   showIosStatusBar: true,
+  showDynamicIsland: false, // Tắt theo mặc định để ảnh chụp màn hình sạch 100% như ảnh chụp phím cứng iPhone
   showHomeBar: true,
 
   // Active sender in current chat: 'me' | 'them'

@@ -242,6 +242,19 @@
           />
         </div>
 
+        <!-- Dynamic Island Toggle -->
+        <div class="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-gray-800">
+          <div>
+            <span class="font-semibold block">Dynamic Island (Viên thuốc đen)</span>
+            <span class="text-xs text-gray-400">Tắt để ảnh chụp sạch 100% như phím cứng iPhone thật</span>
+          </div>
+          <input 
+            type="checkbox" 
+            bind:checked={chatState.showDynamicIsland} 
+            class="w-5 h-5 accent-[#0084ff] rounded cursor-pointer"
+          />
+        </div>
+
         <!-- Home Bar Toggle -->
         <div class="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-gray-800">
           <span class="font-semibold">Thanh gạch đáy (Home Bar)</span>
