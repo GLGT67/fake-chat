@@ -1,8 +1,10 @@
 <script>
-  import { chatState, THEMES, addMessage } from '../state.svelte.js';
-  import { Plus, Camera, Image as ImageIcon, Mic, Smile, Send } from '@lucide/svelte';
+  import { chatState, THEMES, addMessage, getActiveConversation } from '../state.svelte.js';
+  import { Smile, Send } from '@lucide/svelte';
+  import OriginalIcon from './OriginalIcon.svelte';
 
-  const theme = $derived(THEMES[chatState.themeKey] || THEMES.classic);
+  const conv = $derived(getActiveConversation());
+  const theme = $derived(THEMES[conv.themeKey] || THEMES.classic);
   let inputText = $state('');
   let fileInputRef;
 
@@ -98,7 +100,7 @@
           {#if chatState.activeSender === 'me'}
             <span>Tôi gửi ➔</span>
           {:else}
-            <span>◀ {chatState.partnerName} gửi</span>
+            <span>◀ {conv.name} gửi</span>
           {/if}
         </button>
       </div>
@@ -113,28 +115,41 @@
     </div>
   {/if}
 
-  <!-- Main Messenger Input Bar -->
-  <div class="flex items-center px-2 py-1.5 space-x-1.5">
-    <!-- Left Tools -->
-    <div class="flex items-center space-x-1" style="color: {theme.primary};">
+  <!-- Main Messenger Input Bar (HUD 100% matched to activity_messenger_contact_message.xml) -->
+  <div class="flex items-center px-2 py-1.5 space-x-2">
+    <!-- Left Tools: 4-dot, Camera, Gallery, Mic (Using original APK vector drawables) -->
+    <div class="flex items-center space-x-1.5" style="color: {theme.primary};">
+      <!-- 4-dot menu (@7F0A0168 / ic_4_dot) -->
       <button 
         type="button" 
         class="w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform cursor-pointer"
         onclick={openAttach}
-        title="Đính kèm tính năng"
+        title="Menu tính năng (4 chấm)"
       >
-        <Plus size={22} strokeWidth={2.8} />
+        <OriginalIcon name="4_dot" size={19} />
       </button>
 
+      <!-- Camera (@7F0A0187 / ic_camera) -->
       <button 
         type="button" 
         class="w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform cursor-pointer"
         onclick={() => fileInputRef.click()}
-        title="Chọn ảnh"
+        title="Chụp ảnh"
       >
-        <ImageIcon size={21} strokeWidth={2.3} />
+        <OriginalIcon name="camera" size={19} />
       </button>
 
+      <!-- Gallery / Image (@7F0A01BF / ic_add_image) -->
+      <button 
+        type="button" 
+        class="w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform cursor-pointer"
+        onclick={() => fileInputRef.click()}
+        title="Thư viện ảnh"
+      >
+        <OriginalIcon name="image" size={19} />
+      </button>
+
+      <!-- Mic (@7F0A01B3 / ic_mic) -->
       <button 
         type="button" 
         class="w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform cursor-pointer"
@@ -145,13 +160,13 @@
             sender: chatState.activeSender
           });
         }}
-        title="Gửi voice ghi âm"
+        title="Ghi âm giọng nói"
       >
-        <Mic size={21} strokeWidth={2.3} />
+        <OriginalIcon name="mic" size={19} />
       </button>
     </div>
 
-    <!-- Text Input Pill -->
+    <!-- Text Input Pill (@7F0A0105 with hint 'Nhắn tin' & smiley emoji @7F0A01C0) -->
     <div 
       class="flex-1 flex items-center rounded-full px-3 py-1.5 transition-colors"
       class:bg-[#f0f2f5]={!chatState.isDarkMode}
@@ -161,7 +176,7 @@
     >
       <input 
         type="text" 
-        placeholder="Aa"
+        placeholder="Nhắn tin"
         bind:value={inputText}
         onkeydown={handleKeyDown}
         class="w-full bg-transparent text-[15px] outline-none placeholder-gray-400 font-normal leading-normal"
@@ -171,33 +186,33 @@
         class="text-gray-400 active:opacity-60 ml-1 shrink-0"
         onclick={() => { inputText += ' 😊'; }}
       >
-        <Smile size={20} strokeWidth={2} />
+        <Smile size={19} strokeWidth={2} />
       </button>
     </div>
 
     <!-- Right Action Button: Like or Send -->
-    <div class="shrink-0 flex items-center justify-center">
+    <div class="shrink-0 flex items-center justify-center" style="color: {theme.primary};">
       {#if inputText.trim().length > 0}
         <button 
           type="button" 
-          class="w-9 h-9 rounded-full flex items-center justify-center text-white active:scale-90 transition-transform cursor-pointer shadow-xs"
+          class="w-8 h-8 rounded-full flex items-center justify-center text-white active:scale-90 transition-transform cursor-pointer shadow-xs"
           style="background-color: {theme.primary};"
           onclick={handleSend}
           title="Gửi tin nhắn"
         >
-          <Send size={18} strokeWidth={2.5} class="ml-0.5" />
+          <Send size={17} strokeWidth={2.5} class="ml-0.5" />
         </button>
       {:else}
+        <!-- Original ic_like (@7F0A01A4) -->
         <button 
           type="button" 
-          class="w-9 h-9 flex items-center justify-center text-[26px] active:scale-125 transition-transform cursor-pointer select-none"
+          class="w-8 h-8 flex items-center justify-center active:scale-125 transition-transform cursor-pointer select-none"
           onclick={handleSend}
           title="Gửi Like"
         >
-          👍
+          <OriginalIcon name="like" size={24} />
         </button>
       {/if}
     </div>
   </div>
 </div>
-

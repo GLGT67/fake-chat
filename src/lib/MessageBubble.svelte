@@ -1,10 +1,12 @@
 <script>
-  import { chatState, THEMES } from '../state.svelte.js';
+  import { chatState, THEMES, getActiveConversation } from '../state.svelte.js';
   import { Play, Pause, PhoneCall, PhoneMissed, Check, CheckCheck } from '@lucide/svelte';
+  import OriginalIcon from './OriginalIcon.svelte';
 
   const { message, isLastFromSender, isLastOverall } = $props();
 
-  const theme = $derived(THEMES[chatState.themeKey] || THEMES.classic);
+  const conv = $derived(getActiveConversation());
+  const theme = $derived(THEMES[conv.themeKey] || THEMES.classic);
   let isPlayingVoice = $state(false);
   let showTimestamp = $state(false);
 
@@ -24,10 +26,31 @@
     chatState.editingMessageId = message.id;
     chatState.activeModal = 'edit_message';
   }
+
+  let pressTimer = null;
+
+  function handleTouchStart(e) {
+    pressTimer = setTimeout(() => {
+      handleReactionClick(e);
+    }, 450);
+  }
+
+  function handleTouchEnd() {
+    if (pressTimer) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
+  }
+
+  function handleReactionClick(e) {
+    if (e && e.stopPropagation) e.stopPropagation();
+    chatState.reactingMessageId = message.id;
+    chatState.activeModal = 'react';
+  }
 </script>
 
 {#if message.type === 'timestamp_divider'}
-  <!-- Timestamp Divider -->
+  <!-- Timestamp Divider (@7F0D0090 / item_chat_time_message_messenger) -->
   <div 
     class="w-full flex justify-center my-3 select-none cursor-pointer"
     onclick={handleMessageEdit}
@@ -76,18 +99,18 @@
 {:else}
   <!-- Standard Message Bubble (Me or Them) -->
   <div 
-    class="flex flex-col my-[2px] transition-all select-none"
+    class="flex flex-col my-[2.5px] transition-all select-none"
     class:items-end={message.sender === 'me'}
     class:items-start={message.sender === 'them'}
   >
-    <div class="flex items-end max-w-[80%] space-x-1.5 group">
+    <div class="flex items-end max-w-[80%] space-x-1.5 group relative">
       <!-- Them Avatar on the left side of the last message in a group -->
       {#if message.sender === 'them'}
         <div class="w-7 h-7 shrink-0 -mb-0.5">
           {#if isLastFromSender}
             <img 
-              src={chatState.partnerAvatar} 
-              alt={chatState.partnerName} 
+              src={conv.avatar} 
+              alt={conv.name} 
               class="w-7 h-7 rounded-full object-cover border border-black/5 shadow-2xs"
             />
           {/if}
@@ -99,6 +122,9 @@
         class="relative cursor-pointer active:scale-[0.98] transition-transform"
         onclick={handleMessageClick}
         ondblclick={handleMessageEdit}
+        ontouchstart={handleTouchStart}
+        ontouchend={handleTouchEnd}
+        oncontextmenu={(e) => { e.preventDefault(); handleReactionClick(e); }}
         role="button"
         tabindex="0"
         onkeydown={(e) => e.key === 'Enter' && handleMessageEdit(e)}
@@ -113,7 +139,7 @@
             class:text-[#e4e6eb]={message.sender === 'them' && chatState.isDarkMode}
             class:rounded-bl-[4px]={message.sender === 'them' && isLastFromSender}
             class:rounded-br-[4px]={message.sender === 'me' && isLastFromSender}
-            style={message.sender === 'me' ? `background: linear-gradient(135deg, ${theme.primary}, #00b2fe); color: white;` : ''}
+            style={message.sender === 'me' ? `background-color: ${theme.primary}; color: white;` : ''}
           >
             {message.content}
           </div>
@@ -135,7 +161,7 @@
             class:bg-[#303030]={message.sender === 'them' && chatState.isDarkMode}
             class:text-black={message.sender === 'them' && !chatState.isDarkMode}
             class:text-white={message.sender === 'them' && chatState.isDarkMode}
-            style={message.sender === 'me' ? `background: linear-gradient(135deg, ${theme.primary}, #00b2fe); color: white;` : ''}
+            style={message.sender === 'me' ? `background-color: ${theme.primary}; color: white;` : ''}
           >
             <!-- Play/Pause Button -->
             <button 
@@ -165,12 +191,33 @@
           </div>
 
         {:else if message.type === 'like'}
-          <!-- Messenger Like Thumbs Up Icon -->
-          <div class="text-[38px] leading-none select-none active:scale-125 transition-transform drop-shadow-xs">
-            👍
+          <!-- Messenger Like Thumbs Up Icon (using original APK vector) -->
+          <div class="w-10 h-10 select-none active:scale-125 transition-transform" style="color: {theme.primary};">
+            <OriginalIcon name="like" size={38} />
           </div>
         {/if}
+
+        <!-- Reaction Badge Overlay (@7F0A009E / ic_react_*) -->
+        {#if message.react}
+          <button 
+            type="button" 
+            class="absolute -bottom-2 {message.sender === 'me' ? 'left-1' : 'right-1'} bg-white dark:bg-[#242526] rounded-full px-1 py-0.5 shadow-md border border-gray-200 dark:border-gray-700 flex items-center space-x-0.5 active:scale-125 transition-transform cursor-pointer"
+            onclick={handleReactionClick}
+          >
+            <img src="./reacts/ic_react_{message.react}.png" alt={message.react} class="w-4 h-4 object-contain" />
+          </button>
+        {/if}
       </div>
+
+      <!-- Quick Reaction Trigger Button on Hover / Side -->
+      <button 
+        type="button" 
+        class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-yellow-500 transition-opacity cursor-pointer shrink-0"
+        onclick={handleReactionClick}
+        title="Thả cảm xúc"
+      >
+        😊
+      </button>
     </div>
 
     <!-- Subtitle: Timestamp & Status (when tapped or last message) -->
@@ -187,7 +234,7 @@
         {#if message.status === 'seen'}
           <!-- Mini Avatar for Seen -->
           <img 
-            src={chatState.partnerAvatar} 
+            src={conv.avatar} 
             alt="Đã xem" 
             class="w-3.5 h-3.5 rounded-full object-cover ml-1 shadow-2xs border border-white"
             title="Đã xem"
@@ -205,4 +252,3 @@
     </div>
   </div>
 {/if}
-
