@@ -7,6 +7,7 @@
   let avatar = $state(DEFAULT_AVATARS[0]);
   let isOnline = $state(true);
   let statusText = $state('Vừa mới truy cập');
+  let hasVerifiedBadge = $state(false);
   let unreadCount = $state(0);
   let isPinned = $state(false);
 
@@ -17,6 +18,7 @@
       avatar,
       isOnline,
       statusText: statusText.trim() || 'Vừa mới truy cập',
+      hasVerifiedBadge,
       unreadCount: parseInt(String(unreadCount)) || 0,
       isPinned
     });
@@ -126,6 +128,18 @@
           bind:value={statusText}
           placeholder="Vừa mới truy cập / Truy cập 15 phút trước..."
           class="w-full px-4 py-2 rounded-xl border border-gray-200 bg-[#f0f2f5] outline-none text-sm text-black"
+        />
+      </div>
+      <!-- Verified Badge Toggle -->
+      <div class="flex items-center justify-between pt-1">
+        <div>
+          <span class="font-bold text-[15px] block text-gray-900">Tích xanh xác minh (Verified)</span>
+          <span class="text-xs text-gray-400">Hiện huy hiệu tick xanh chính chủ cạnh tên</span>
+        </div>
+        <input 
+          type="checkbox" 
+          bind:checked={hasVerifiedBadge}
+          class="w-6 h-6 accent-[#0068ff] rounded cursor-pointer" 
         />
       </div>
     </div>

@@ -1,4 +1,4 @@
-// Svelte 5 Reactive State Store for Fake Chat Messenger - Exact 1:1 APK Clone
+// Svelte 5 Reactive State Store for Fake Chat Messenger & Zalo - Exact 1:1 Clone
 
 export const DEFAULT_AVATARS = [
   "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&crop=faces",
@@ -49,32 +49,27 @@ export const chatState = $state({
 
   // Navigation Screens for Zalo: 'zalo_chats_list' | 'zalo_chat_room' | 'zalo_create_contact'
   zaloScreen: 'zalo_chat_room',
-  zaloActiveTab: 'messages', // 'messages' | 'contacts' | 'explore' | 'timeline' | 'profile'
+  zaloActiveTab: 'messages',
   zaloActiveContactId: 'z-1',
 
   // App Theme & Mode
   isDarkMode: false,
   isSnapshotMode: false,
   /** @type {string | null} */
-  activeModal: null, // null | 'profile' | 'edit_message' | 'attach' | 'call' | 'react'
+  activeModal: null, // null | 'profile' | 'edit_message' | 'attach' | 'call' | 'react' | 'message_action'
   /** @type {string | null} */
   editingMessageId: null,
   /** @type {string | null} */
   reactingMessageId: null,
+  /** @type {any} */
+  selectedActionMessage: null,
+  /** @type {any} */
+  replyingToMessage: null,
 
   // Active Conversation Info (selected or default)
   activeContactId: "c-1",
 
-  get partnerName() {
-    const c = this.conversations.find((/** @type {any} */ item) => item.id === this.activeContactId);
-    return (c || this.conversations[0])?.name || "";
-  },
-  get partnerAvatar() {
-    const c = this.conversations.find((/** @type {any} */ item) => item.id === this.activeContactId);
-    return (c || this.conversations[0])?.avatar || "";
-  },
-
-  // Contacts / Conversations List (100% like activity_main_messenger)
+  // Contacts / Conversations List for Messenger (All demo messages emptied as requested)
   conversations: [
     {
       id: "c-1",
@@ -85,56 +80,9 @@ export const chatState = $state({
       hasVerifiedBadge: false,
       themeKey: "classic",
       unreadCount: 0,
-      lastMessage: "Dạ vâng, em đang chuẩn bị xuất phát rồi nè ❤️",
-      lastTime: "09:38",
-      messages: [
-        {
-          id: "m-1",
-          sender: "them",
-          type: "text",
-          content: "Chào anh, hôm nay anh có rảnh đi cafe không ạ? ✨",
-          timestamp: "09:30",
-          status: "seen",
-          react: null
-        },
-        {
-          id: "m-2",
-          sender: "me",
-          type: "text",
-          content: "Anh rảnh nè, hẹn em 10h ở quán quen nhé! ☕",
-          timestamp: "09:32",
-          status: "seen",
-          react: "heart"
-        },
-        {
-          id: "m-3",
-          sender: "them",
-          type: "voice",
-          content: "",
-          voiceDuration: "0:14",
-          timestamp: "09:33",
-          status: "seen",
-          react: null
-        },
-        {
-          id: "m-4",
-          sender: "me",
-          type: "like",
-          content: "👍",
-          timestamp: "09:35",
-          status: "seen",
-          react: null
-        },
-        {
-          id: "m-5",
-          sender: "them",
-          type: "text",
-          content: "Dạ vâng, em đang chuẩn bị xuất phát rồi nè ❤️",
-          timestamp: "09:38",
-          status: "seen",
-          react: "like"
-        }
-      ]
+      lastMessage: "",
+      lastTime: "Vừa xong",
+      messages: []
     },
     {
       id: "c-2",
@@ -144,20 +92,10 @@ export const chatState = $state({
       statusText: "Hoạt động 5 phút trước",
       hasVerifiedBadge: true,
       themeKey: "ocean",
-      unreadCount: 2,
-      lastMessage: "Tối nay nhớ gọi cho em nhé!",
+      unreadCount: 0,
+      lastMessage: "",
       lastTime: "08:15",
-      messages: [
-        {
-          id: "m-201",
-          sender: "them",
-          type: "text",
-          content: "Tối nay nhớ gọi cho em nhé!",
-          timestamp: "08:15",
-          status: "seen",
-          react: null
-        }
-      ]
+      messages: []
     },
     {
       id: "c-3",
@@ -168,19 +106,9 @@ export const chatState = $state({
       hasVerifiedBadge: false,
       themeKey: "classic",
       unreadCount: 0,
-      lastMessage: "Hôm nay gửi file báo cáo cho mình nhé.",
+      lastMessage: "",
       lastTime: "Hôm qua",
-      messages: [
-        {
-          id: "m-301",
-          sender: "them",
-          type: "text",
-          content: "Hôm nay gửi file báo cáo cho mình nhé.",
-          timestamp: "Hôm qua",
-          status: "seen",
-          react: null
-        }
-      ]
+      messages: []
     }
   ],
 
@@ -192,13 +120,13 @@ export const chatState = $state({
   wifiEnabled: true,
   cellularType: "5G",
   showIosStatusBar: true,
-  showDynamicIsland: false, // Tắt theo mặc định để ảnh chụp màn hình sạch 100% như ảnh chụp phím cứng iPhone
+  showDynamicIsland: false,
   showHomeBar: true,
 
   // Active sender in current chat: 'me' | 'them'
   activeSender: "me",
 
-  // Zalo Conversations List (100% like sample images)
+  // Zalo Conversations List (All demo messages emptied as requested)
   zaloConversations: [
     {
       id: "z-1",
@@ -206,78 +134,11 @@ export const chatState = $state({
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop&crop=faces",
       statusText: "Vừa mới truy cập",
       isOnline: true,
-      lastMessage: "dạ em mới gửi kb rồi",
-      lastTime: "16:56",
+      hasVerifiedBadge: false,
+      lastMessage: "",
+      lastTime: "Vừa xong",
       unreadCount: 0,
-      messages: [
-        {
-          id: "zm-1",
-          sender: "them",
-          type: "text",
-          content: "Mấy studio lớn thì nó tách ra thành 1 bộ phận khác luôn là UA",
-          timestamp: "16:33",
-          status: "seen",
-          hasHeart: false
-        },
-        {
-          id: "zm-2",
-          sender: "me",
-          type: "text",
-          content: "dạ",
-          timestamp: "16:51",
-          status: "seen",
-          hasHeart: false
-        },
-        {
-          id: "zm-3",
-          sender: "me",
-          type: "text",
-          content: "thế cho em ứng ạ",
-          timestamp: "16:51",
-          status: "seen",
-          hasHeart: false
-        },
-        {
-          id: "zm-4",
-          sender: "me",
-          type: "text",
-          content: "=))",
-          timestamp: "16:52",
-          status: "seen",
-          hasHeart: false
-        },
-        {
-          id: "zm-5",
-          sender: "them",
-          type: "contact_card",
-          cardName: "Thu Hướng",
-          cardAvatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=300&fit=crop&crop=faces",
-          content: "Danh thiếp Zalo",
-          timestamp: "16:55",
-          status: "seen",
-          hasHeart: true
-        },
-        {
-          id: "zm-6",
-          sender: "them",
-          type: "reply_quote",
-          quoteSender: "Nguyễn sơn Tùng",
-          quoteText: "thế cho em ứng ạ",
-          content: "Nhắn i",
-          timestamp: "16:56",
-          status: "seen",
-          hasHeart: true
-        },
-        {
-          id: "zm-7",
-          sender: "me",
-          type: "text",
-          content: "dạ em mới gửi kb rồi",
-          timestamp: "16:56",
-          status: "received",
-          hasHeart: false
-        }
-      ]
+      messages: []
     },
     {
       id: "z-2",
@@ -285,7 +146,8 @@ export const chatState = $state({
       avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop&crop=faces",
       statusText: "",
       isOnline: false,
-      lastMessage: "Thuý yêu: 2 giám khảo",
+      hasVerifiedBadge: false,
+      lastMessage: "",
       lastTime: "19/10",
       isPinned: true,
       unreadCount: 0,
@@ -298,7 +160,7 @@ export const chatState = $state({
       statusText: "Tài khoản chính thức",
       hasVerifiedBadge: true,
       isOnline: true,
-      lastMessage: "Xác nhận hành vi bất thường trên tài...",
+      lastMessage: "",
       lastTime: "6 giờ",
       unreadCount: 0,
       messages: []
@@ -308,21 +170,23 @@ export const chatState = $state({
       name: "Nguyễn Thị Hải Ninh",
       avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&crop=faces",
       statusText: "Truy cập 15 phút trước",
+      hasVerifiedBadge: false,
       isOnline: false,
-      lastMessage: "Ok",
+      lastMessage: "",
       lastTime: "9 giờ",
-      unreadCount: 1,
+      unreadCount: 0,
       messages: []
     },
     {
       id: "z-5",
-      name: "Thiết kế đồ hoạ - B25GA04_D...",
+      name: "Thiết kế đồ hoạ",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=faces",
       statusText: "",
+      hasVerifiedBadge: false,
       isOnline: true,
-      lastMessage: "Phan Thu Trang: @All mng gửi...",
+      lastMessage: "",
       lastTime: "22 giờ",
-      unreadCount: 2,
+      unreadCount: 0,
       hasMention: true,
       messages: []
     },
@@ -331,8 +195,9 @@ export const chatState = $state({
       name: "Game Data Research",
       avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=300&fit=crop&crop=faces",
       statusText: "",
+      hasVerifiedBadge: false,
       isOnline: true,
-      lastMessage: "Thu Hương: không bôi đậm bừa bãi nhé",
+      lastMessage: "",
       lastTime: "T3",
       unreadCount: 0,
       messages: []
@@ -342,10 +207,11 @@ export const chatState = $state({
       name: "Quyên Xử Lý Nước",
       avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&crop=faces",
       statusText: "Truy cập 1 giờ trước",
+      hasVerifiedBadge: false,
       isOnline: false,
-      lastMessage: "[Cuộc gọi thoại nhỡ]",
+      lastMessage: "",
       lastTime: "T2",
-      unreadCount: 1,
+      unreadCount: 0,
       messages: []
     }
   ],
@@ -360,6 +226,15 @@ export const chatState = $state({
 export function getActiveConversation() {
   const conv = chatState.conversations.find(c => c.id === chatState.activeContactId);
   return conv || chatState.conversations[0];
+}
+
+export function getActiveZaloConversation() {
+  const conv = chatState.zaloConversations.find(c => c.id === chatState.zaloActiveContactId);
+  return conv || chatState.zaloConversations[0];
+}
+
+export function getCurrentActiveChat() {
+  return chatState.currentApp === 'zalo' ? getActiveZaloConversation() : getActiveConversation();
 }
 
 // Helper actions
@@ -379,19 +254,9 @@ export function addConversation(/** @type {any} */ data) {
     hasVerifiedBadge: data.hasVerifiedBadge || false,
     themeKey: data.themeKey || "classic",
     unreadCount: data.unreadCount || 0,
-    lastMessage: data.lastMessage || "Xin chào!",
+    lastMessage: "",
     lastTime: getCurrentFormattedTime(),
-    messages: [
-      {
-        id: "m-" + Date.now(),
-        sender: "them",
-        type: "text",
-        content: data.lastMessage || "Xin chào!",
-        timestamp: getCurrentFormattedTime(),
-        status: "seen",
-        react: null
-      }
-    ]
+    messages: []
   };
   chatState.conversations.unshift(newConv);
   chatState.activeContactId = newId;
@@ -400,6 +265,7 @@ export function addConversation(/** @type {any} */ data) {
 
 export function addMessage(/** @type {any} */ data) {
   const conv = getActiveConversation();
+  const quote = chatState.replyingToMessage;
   const newMsg = {
     id: "m-" + Date.now() + "-" + Math.random().toString(36).substr(2, 4),
     sender: data.sender || chatState.activeSender,
@@ -410,15 +276,18 @@ export function addMessage(/** @type {any} */ data) {
     voiceDuration: data.voiceDuration || "0:15",
     imageUri: data.imageUri || null,
     callInfo: data.callInfo || null,
+    quoteSender: quote ? (quote.sender === 'me' ? 'Bạn' : conv.name) : (data.quoteSender || null),
+    quoteText: quote ? (quote.content || (quote.type === 'voice' ? 'Tin nhắn thoại' : 'Hình ảnh')) : (data.quoteText || null),
     react: null
   };
   conv.messages.push(newMsg);
   conv.lastMessage = data.type === 'like' ? '👍' : (data.content || 'Đã gửi file');
   conv.lastTime = newMsg.timestamp;
+  chatState.replyingToMessage = null; // Clear reply after sending
 }
 
 export function updateMessage(/** @type {string} */ id, /** @type {any} */ updates) {
-  const conv = getActiveConversation();
+  const conv = getCurrentActiveChat();
   const index = conv.messages.findIndex(m => m.id === id);
   if (index !== -1) {
     conv.messages[index] = { ...conv.messages[index], ...updates };
@@ -426,12 +295,12 @@ export function updateMessage(/** @type {string} */ id, /** @type {any} */ updat
 }
 
 export function deleteMessage(/** @type {string} */ id) {
-  const conv = getActiveConversation();
+  const conv = getCurrentActiveChat();
   conv.messages = conv.messages.filter(m => m.id !== id);
 }
 
 export function insertMessageAt(/** @type {string} */ id, /** @type {any} */ data, position = "after") {
-  const conv = getActiveConversation();
+  const conv = getCurrentActiveChat();
   const index = conv.messages.findIndex(m => m.id === id);
   if (index === -1) return;
   const newMsg = {
@@ -450,30 +319,40 @@ export function insertMessageAt(/** @type {string} */ id, /** @type {any} */ dat
   }
 }
 
+export function toggleMessageSender(/** @type {string} */ id) {
+  const conv = getCurrentActiveChat();
+  const msg = conv.messages.find(m => m.id === id);
+  if (msg) {
+    msg.sender = msg.sender === 'me' ? 'them' : 'me';
+  }
+}
+
 export function setReaction(/** @type {string} */ msgId, /** @type {string | null} */ reactType) {
-  const conv = getActiveConversation();
+  const conv = getCurrentActiveChat();
   const msg = conv.messages.find(m => m.id === msgId);
   if (msg) {
-    msg.react = msg.react === reactType ? null : reactType;
+    if (chatState.currentApp === 'zalo') {
+      msg.hasHeart = !msg.hasHeart;
+    } else {
+      msg.react = msg.react === reactType ? null : reactType;
+    }
   }
   chatState.activeModal = null;
   chatState.reactingMessageId = null;
+  chatState.selectedActionMessage = null;
 }
 
 export function clearCurrentChat() {
-  const conv = getActiveConversation();
-  conv.messages = [];
-  conv.lastMessage = "";
+  const conv = getCurrentActiveChat();
+  if (conv) {
+    conv.messages = [];
+    conv.lastMessage = "";
+  }
 }
 
 export const clearAllMessages = clearCurrentChat;
 
 // --- ZALO HELPERS ---
-export function getActiveZaloConversation() {
-  const conv = chatState.zaloConversations.find(c => c.id === chatState.zaloActiveContactId);
-  return conv || chatState.zaloConversations[0];
-}
-
 export function selectZaloConversation(/** @type {string} */ id) {
   chatState.zaloActiveContactId = id;
   chatState.zaloScreen = 'zalo_chat_room';
@@ -490,19 +369,9 @@ export function addZaloConversation(/** @type {any} */ data) {
     hasVerifiedBadge: data.hasVerifiedBadge || false,
     unreadCount: data.unreadCount || 0,
     isPinned: data.isPinned || false,
-    lastMessage: data.lastMessage || "Xin chào bạn!",
+    lastMessage: "",
     lastTime: getCurrentFormattedTime(),
-    messages: [
-      {
-        id: "zm-" + Date.now(),
-        sender: "them",
-        type: "text",
-        content: data.lastMessage || "Xin chào bạn!",
-        timestamp: getCurrentFormattedTime(),
-        status: "seen",
-        hasHeart: false
-      }
-    ]
+    messages: []
   };
   chatState.zaloConversations.unshift(newConv);
   chatState.zaloActiveContactId = newId;
@@ -511,24 +380,27 @@ export function addZaloConversation(/** @type {any} */ data) {
 
 export function addZaloMessage(/** @type {any} */ data) {
   const conv = getActiveZaloConversation();
+  const quote = chatState.replyingToMessage;
+  const isQuote = !!quote || !!data.quoteText;
   const newMsg = {
     id: "zm-" + Date.now() + "-" + Math.random().toString(36).substr(2, 4),
     sender: data.sender || chatState.activeSender,
-    type: data.type || "text",
+    type: isQuote ? 'reply_quote' : (data.type || "text"),
     content: data.content || "",
     timestamp: data.timestamp || getCurrentFormattedTime(),
     status: data.status || (data.sender === "me" ? "received" : "seen"),
     hasHeart: data.hasHeart || false,
     cardName: data.cardName || null,
     cardAvatar: data.cardAvatar || null,
-    quoteSender: data.quoteSender || null,
-    quoteText: data.quoteText || null,
+    quoteSender: quote ? (quote.sender === 'me' ? 'Bạn' : conv.name) : (data.quoteSender || null),
+    quoteText: quote ? (quote.content || (quote.type === 'voice' ? 'Tin nhắn thoại' : 'Hình ảnh')) : (data.quoteText || null),
     imageUri: data.imageUri || null,
     voiceDuration: data.voiceDuration || "0:15"
   };
   conv.messages.push(newMsg);
   conv.lastMessage = data.content || "Đã gửi file";
   conv.lastTime = newMsg.timestamp;
+  chatState.replyingToMessage = null; // Clear reply after sending
 }
 
 export function toggleZaloHeart(/** @type {string} */ msgId) {

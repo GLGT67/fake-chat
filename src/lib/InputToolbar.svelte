@@ -1,6 +1,6 @@
 <script>
   import { chatState, THEMES, addMessage, getActiveConversation } from '../state.svelte.js';
-  import { Smile, Send } from '@lucide/svelte';
+  import { Smile, Send, X, Reply } from '@lucide/svelte';
   import OriginalIcon from './OriginalIcon.svelte';
 
   const conv = $derived(getActiveConversation());
@@ -16,6 +16,7 @@
         content: '👍',
         sender: chatState.activeSender
       });
+      resetViewport();
       return;
     }
 
@@ -25,6 +26,14 @@
       sender: chatState.activeSender
     });
     inputText = '';
+    resetViewport();
+  }
+
+  function resetViewport() {
+    // Reset any iOS Safari viewport shift
+    setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }, 50);
   }
 
   function handleKeyDown(e) {
@@ -53,10 +62,15 @@
           content: 'Hình ảnh',
           sender: chatState.activeSender
         });
+        resetViewport();
       };
       reader.readAsDataURL(file);
     }
     e.target.value = '';
+  }
+
+  function cancelReply() {
+    chatState.replyingToMessage = null;
   }
 </script>
 
@@ -75,6 +89,37 @@
     onchange={handleImageUpload} 
     class="hidden" 
   />
+
+  <!-- Active Quote Reply Preview Banner -->
+  {#if chatState.replyingToMessage}
+    <div 
+      class="flex items-center justify-between px-3.5 py-1.5 border-b text-[12px] animate-in fade-in slide-in-from-bottom-2 duration-150"
+      class:bg-gray-100={!chatState.isDarkMode}
+      class:bg-[#202124]={chatState.isDarkMode}
+      class:border-gray-200={!chatState.isDarkMode}
+      class:border-gray-700={chatState.isDarkMode}
+    >
+      <div class="flex items-center space-x-2 min-w-0 flex-1 border-l-2 border-[#0084ff] pl-2">
+        <Reply size={14} class="text-[#0084ff] shrink-0" />
+        <div class="truncate">
+          <span class="font-bold text-gray-700 dark:text-gray-200">
+            Đang trả lời {chatState.replyingToMessage.sender === 'me' ? 'chính bạn' : conv.name}:
+          </span>
+          <span class="text-gray-500 italic ml-1 truncate">
+            {chatState.replyingToMessage.content || 'Tin nhắn thoại / Hình ảnh'}
+          </span>
+        </div>
+      </div>
+      <button 
+        type="button" 
+        class="w-5 h-5 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-white cursor-pointer active:scale-90 ml-2 shrink-0"
+        onclick={cancelReply}
+        title="Hủy trả lời"
+      >
+        <X size={14} />
+      </button>
+    </div>
+  {/if}
 
   <!-- Quick Switcher Bar (Toggled off in snapshot mode) -->
   {#if !chatState.isSnapshotMode}
@@ -159,6 +204,7 @@
             voiceDuration: '0:22',
             sender: chatState.activeSender
           });
+          resetViewport();
         }}
         title="Ghi âm giọng nói"
       >
@@ -179,7 +225,8 @@
         placeholder="Nhắn tin"
         bind:value={inputText}
         onkeydown={handleKeyDown}
-        class="w-full bg-transparent text-[15px] outline-none placeholder-gray-400 font-normal leading-normal"
+        onblur={resetViewport}
+        class="w-full bg-transparent text-[16px] outline-none placeholder-gray-400 font-normal leading-normal"
       />
       <button 
         type="button" 

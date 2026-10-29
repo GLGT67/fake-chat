@@ -7,7 +7,7 @@
   const filteredConversations = $derived(
     chatState.conversations.filter(c => 
       c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+      (c.lastMessage || '').toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
 

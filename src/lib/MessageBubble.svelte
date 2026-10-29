@@ -17,36 +17,10 @@
     }
   }
 
-  function handleMessageClick() {
-    showTimestamp = !showTimestamp;
-  }
-
-  function handleMessageEdit(/** @type {any} */ e) {
+  function openActionModal(/** @type {any} */ e) {
     if (e && e.stopPropagation) e.stopPropagation();
-    chatState.editingMessageId = message.id;
-    chatState.activeModal = 'edit_message';
-  }
-
-  /** @type {any} */
-  let pressTimer = null;
-
-  function handleTouchStart(/** @type {any} */ e) {
-    pressTimer = setTimeout(() => {
-      handleReactionClick(e);
-    }, 450);
-  }
-
-  function handleTouchEnd() {
-    if (pressTimer) {
-      clearTimeout(pressTimer);
-      pressTimer = null;
-    }
-  }
-
-  function handleReactionClick(/** @type {any} */ e) {
-    if (e && e.stopPropagation) e.stopPropagation();
-    chatState.reactingMessageId = message.id;
-    chatState.activeModal = 'react';
+    chatState.selectedActionMessage = message;
+    chatState.activeModal = 'message_action';
   }
 </script>
 
@@ -54,10 +28,10 @@
   <!-- Timestamp Divider (@7F0D0090 / item_chat_time_message_messenger) -->
   <div 
     class="w-full flex justify-center my-3 select-none cursor-pointer"
-    onclick={handleMessageEdit}
+    onclick={openActionModal}
     role="button"
     tabindex="0"
-    onkeydown={(e) => e.key === 'Enter' && handleMessageEdit(e)}
+    onkeydown={(e) => e.key === 'Enter' && openActionModal(e)}
   >
     <span 
       class="text-[11px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full transition-colors"
@@ -72,10 +46,10 @@
   <!-- Call Event Notification Banner -->
   <div 
     class="w-full flex flex-col items-center justify-center my-2 select-none cursor-pointer"
-    onclick={handleMessageEdit}
+    onclick={openActionModal}
     role="button"
     tabindex="0"
-    onkeydown={(e) => e.key === 'Enter' && handleMessageEdit(e)}
+    onkeydown={(e) => e.key === 'Enter' && openActionModal(e)}
   >
     <div 
       class="flex items-center space-x-1.5 px-3 py-1 rounded-full text-[12px] font-medium shadow-2xs border transition-colors"
@@ -118,17 +92,14 @@
         </div>
       {/if}
 
-      <!-- Message Content Container -->
+      <!-- Message Content Container (Tap to open full actions) -->
       <div 
         class="relative cursor-pointer active:scale-[0.98] transition-transform"
-        onclick={handleMessageClick}
-        ondblclick={handleMessageEdit}
-        ontouchstart={handleTouchStart}
-        ontouchend={handleTouchEnd}
-        oncontextmenu={(e) => { e.preventDefault(); handleReactionClick(e); }}
+        onclick={openActionModal}
         role="button"
         tabindex="0"
-        onkeydown={(e) => e.key === 'Enter' && handleMessageEdit(e)}
+        onkeydown={(e) => e.key === 'Enter' && openActionModal(e)}
+        title="Nhấn để tương tác: Thả cảm xúc, Trả lời, Sửa, Đổi người gửi, Xóa"
       >
         {#if message.type === 'text'}
           <!-- Text Bubble -->
@@ -142,6 +113,14 @@
             class:rounded-br-[4px]={message.sender === 'me' && isLastFromSender}
             style={message.sender === 'me' ? `background-color: ${theme.primary}; color: white;` : ''}
           >
+            <!-- Quote Reply block if message replies to someone -->
+            {#if message.quoteText}
+              <div class="mb-1.5 px-2.5 py-1 rounded-xl text-[12px] border-l-3 text-left transition-colors {message.sender === 'me' ? 'bg-white/20 border-white' : 'bg-black/5 border-[#0084ff]'}">
+                <span class="font-bold block text-[11px] opacity-80">{message.quoteSender || 'Trả lời'}</span>
+                <p class="truncate opacity-90">{message.quoteText}</p>
+              </div>
+            {/if}
+
             {message.content}
           </div>
 
@@ -167,7 +146,7 @@
             <!-- Play/Pause Button -->
             <button 
               type="button" 
-              class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0 active:scale-90 transition-transform"
+              class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0 active:scale-90 transition-transform cursor-pointer"
               onclick={(e) => { e.stopPropagation(); toggleVoice(); }}
             >
               {#if isPlayingVoice}
@@ -202,34 +181,32 @@
         {#if message.react}
           <button 
             type="button" 
-            class="absolute -bottom-2 {message.sender === 'me' ? 'left-1' : 'right-1'} bg-white dark:bg-[#242526] rounded-full px-1 py-0.5 shadow-md border border-gray-200 dark:border-gray-700 flex items-center space-x-0.5 active:scale-125 transition-transform cursor-pointer"
-            onclick={handleReactionClick}
+            class="absolute -bottom-2 {message.sender === 'me' ? 'left-1' : 'right-1'} bg-white dark:bg-[#242526] rounded-full px-1.5 py-0.5 shadow-md border border-gray-200 dark:border-gray-700 flex items-center space-x-0.5 active:scale-125 transition-transform cursor-pointer"
+            onclick={openActionModal}
           >
             <img src="./reacts/ic_react_{message.react}.png" alt={message.react} class="w-4 h-4 object-contain" />
           </button>
         {/if}
       </div>
 
-      <!-- Quick Reaction Trigger Button on Hover / Side -->
+      <!-- Quick Action Trigger Button on Hover / Mobile tap -->
       <button 
         type="button" 
         class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-yellow-500 transition-opacity cursor-pointer shrink-0"
-        onclick={handleReactionClick}
-        title="Thả cảm xúc"
+        onclick={openActionModal}
+        title="Tương tác tin nhắn"
       >
         😊
       </button>
     </div>
 
-    <!-- Subtitle: Timestamp & Status (when tapped or last message) -->
+    <!-- Subtitle: Timestamp & Status -->
     <div 
       class="text-[11px] px-1 mt-0.5 flex items-center space-x-1 transition-opacity duration-200 select-none"
       class:text-gray-400={chatState.isDarkMode}
       class:text-gray-500={!chatState.isDarkMode}
     >
-      {#if showTimestamp || isLastOverall}
-        <span>{message.timestamp}</span>
-      {/if}
+      <span>{message.timestamp}</span>
 
       {#if message.sender === 'me' && isLastOverall}
         {#if message.status === 'seen'}

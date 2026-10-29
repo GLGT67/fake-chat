@@ -6,6 +6,7 @@
   let avatar = $state(DEFAULT_AVATARS[0]);
   let isOnline = $state(true);
   let statusText = $state('Đang hoạt động');
+  let hasVerifiedBadge = $state(false);
   let hasUnread = $state(false);
   let themeKey = $state('classic');
 
@@ -16,6 +17,7 @@
       avatar,
       isOnline,
       statusText: statusText.trim() || 'Đang hoạt động',
+      hasVerifiedBadge,
       unreadCount: hasUnread ? 1 : 0,
       themeKey
     });
@@ -147,6 +149,19 @@
           class:text-black={!chatState.isDarkMode}
         />
       </div>
+    </div>
+
+    <!-- Verified Badge Switch -->
+    <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
+      <div>
+        <span class="font-bold text-[15px] block text-gray-900 dark:text-white">Tích xanh xác minh (Verified)</span>
+        <span class="text-xs text-gray-400">Hiện huy hiệu tích xanh chính chủ cạnh tên</span>
+      </div>
+      <input 
+        type="checkbox" 
+        bind:checked={hasVerifiedBadge}
+        class="w-6 h-6 accent-[#0084ff] rounded cursor-pointer" 
+      />
     </div>
 
     <!-- Unread Message Switch (@7F0A02E0) -->

@@ -1,7 +1,8 @@
 <script>
-  import { chatState, THEMES, DEFAULT_AVATARS, getCurrentFormattedTime } from '../state.svelte.js';
-  import { X, Upload, Check, Moon, Sun, Smartphone, User, Palette } from '@lucide/svelte';
+  import { chatState, THEMES, DEFAULT_AVATARS, getCurrentFormattedTime, getCurrentActiveChat } from '../state.svelte.js';
+  import { X, Upload, Check, Moon, Sun, Smartphone, User, Palette, BadgeCheck } from '@lucide/svelte';
 
+  const conv = $derived(getCurrentActiveChat());
   let activeTab = $state('user'); // 'user' | 'theme' | 'ios'
 
   function closeModal() {
@@ -10,10 +11,12 @@
 
   function handleAvatarUpload(e) {
     const file = e.target.files?.[0];
-    if (file) {
+    if (file && conv) {
       const reader = new FileReader();
       reader.onload = () => {
-        chatState.partnerAvatar = reader.result;
+        if (typeof reader.result === 'string') {
+          conv.avatar = reader.result;
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -39,7 +42,12 @@
          class:border-[#2e2e2e]={chatState.isDarkMode}
          class:border-gray-100={!chatState.isDarkMode}
     >
-      <h2 class="text-[17px] font-bold">Cài đặt & Tùy biến</h2>
+      <div class="flex items-center space-x-2">
+        <h2 class="text-[17px] font-bold">Cài đặt & Tùy biến</h2>
+        <span class="text-xs px-2 py-0.5 rounded-full font-bold {chatState.currentApp === 'zalo' ? 'bg-[#0068ff] text-white' : 'bg-[#0084ff] text-white'}">
+          {chatState.currentApp === 'zalo' ? 'Zalo' : 'Messenger'}
+        </span>
+      </div>
       <button 
         type="button" 
         class="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-800 dark:hover:text-white active:scale-90 transition-transform cursor-pointer"
@@ -96,14 +104,14 @@
 
     <!-- Modal Body -->
     <div class="p-5 overflow-y-auto space-y-4 text-[14px]">
-      {#if activeTab === 'user'}
+      {#if activeTab === 'user' && conv}
         <!-- Partner Name -->
         <div class="space-y-1.5">
           <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider">Tên người nhận</span>
           <input 
             type="text" 
-            bind:value={chatState.partnerName} 
-            class="w-full px-3.5 py-2 rounded-xl border outline-none font-medium text-[15px] focus:ring-2 focus:ring-[#0084ff]/40 transition-all"
+            bind:value={conv.name} 
+            class="w-full px-3.5 py-2 rounded-xl border outline-none font-medium text-[16px] focus:ring-2 focus:ring-[#0084ff]/40 transition-all"
             class:bg-[#2a2a2a]={chatState.isDarkMode}
             class:border-[#3a3b3c]={chatState.isDarkMode}
             class:bg-gray-50={!chatState.isDarkMode}
@@ -111,12 +119,18 @@
           />
         </div>
 
-        <!-- Verified Badge Checkbox -->
-        <div class="flex items-center justify-between py-1">
-          <span class="font-medium">Tích xanh xác minh (Verified)</span>
+        <!-- Verified Badge Checkbox (TÍCH XANH) -->
+        <div class="flex items-center justify-between p-3 rounded-2xl border transition-colors {conv.hasVerifiedBadge ? (chatState.isDarkMode ? 'bg-blue-950/40 border-blue-400' : 'bg-blue-50 border-blue-300') : (chatState.isDarkMode ? 'border-[#3a3b3c]' : 'border-gray-200')}">
+          <div class="flex items-center space-x-2">
+            <BadgeCheck size={20} class="text-[#0084ff] shrink-0 fill-[#0084ff] text-white" />
+            <div>
+              <span class="font-bold block text-[14px]">Tích xanh xác minh (Verified)</span>
+              <span class="text-xs text-gray-500">Hiển thị huy hiệu tích xanh chính chủ cạnh tên</span>
+            </div>
+          </div>
           <input 
             type="checkbox" 
-            bind:checked={chatState.hasVerifiedBadge} 
+            bind:checked={conv.hasVerifiedBadge} 
             class="w-5 h-5 accent-[#0084ff] rounded cursor-pointer"
           />
         </div>
@@ -126,7 +140,7 @@
           <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider">Ảnh đại diện</span>
           <div class="flex items-center space-x-3">
             <img 
-              src={chatState.partnerAvatar} 
+              src={conv.avatar} 
               alt="Avatar preview" 
               class="w-14 h-14 rounded-full object-cover border-2 border-[#0084ff] shadow-sm shrink-0" 
             />
@@ -144,9 +158,9 @@
               <button 
                 type="button" 
                 class="w-8 h-8 rounded-full overflow-hidden border-2 cursor-pointer transition-transform active:scale-95"
-                class:border-[#0084ff]={chatState.partnerAvatar === av}
-                class:border-transparent={chatState.partnerAvatar !== av}
-                onclick={() => { chatState.partnerAvatar = av; }}
+                class:border-[#0084ff]={conv.avatar === av}
+                class:border-transparent={conv.avatar !== av}
+                onclick={() => { conv.avatar = av; }}
               >
                 <img src={av} alt="Preset" class="w-full h-full object-cover" />
               </button>
@@ -155,12 +169,15 @@
         </div>
 
         <!-- Online Status & Text -->
-        <div class="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+        <div class="space-y-3 pt-2 border-t border-gray-100 dark:border-gray-800">
           <div class="flex items-center justify-between">
-            <span class="font-medium">Bật chấm xanh Online</span>
+            <div class="flex items-center space-x-2">
+              <span class="w-3 h-3 bg-[#31a24c] rounded-full inline-block"></span>
+              <span class="font-medium">Bật chấm xanh Online</span>
+            </div>
             <input 
               type="checkbox" 
-              bind:checked={chatState.isOnline} 
+              bind:checked={conv.isOnline} 
               class="w-5 h-5 accent-[#31a24c] rounded cursor-pointer"
             />
           </div>
@@ -169,14 +186,25 @@
             <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider">Dòng chữ trạng thái</span>
             <input 
               type="text" 
-              bind:value={chatState.statusText} 
-              placeholder="Đang hoạt động / Hoạt động 10 phút trước..."
-              class="w-full px-3.5 py-2 rounded-xl border outline-none font-medium text-[14px]"
+              bind:value={conv.statusText} 
+              placeholder="Đang hoạt động / Vừa mới truy cập..."
+              class="w-full px-3.5 py-2 rounded-xl border outline-none font-medium text-[16px]"
               class:bg-[#2a2a2a]={chatState.isDarkMode}
               class:border-[#3a3b3c]={chatState.isDarkMode}
               class:bg-gray-50={!chatState.isDarkMode}
               class:border-gray-200={!chatState.isDarkMode}
             />
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              {#each ['Đang hoạt động', 'Vừa mới truy cập', 'Hoạt động 5 phút trước', 'Hoạt động 1 giờ trước', 'Tài khoản chính thức'] as quickStatus}
+                <button 
+                  type="button" 
+                  class="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer"
+                  onclick={() => { conv.statusText = quickStatus; }}
+                >
+                  {quickStatus}
+                </button>
+              {/each}
+            </div>
           </div>
         </div>
 
@@ -200,87 +228,47 @@
           <input 
             type="checkbox" 
             bind:checked={chatState.isDarkMode} 
-            class="w-6 h-6 accent-[#0084ff] rounded cursor-pointer"
+            class="w-5 h-5 accent-[#0084ff] rounded cursor-pointer"
           />
         </div>
 
-        <!-- Color Themes Palette -->
-        <div class="space-y-2 pt-2">
-          <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider">Màu chủ đề Messenger</span>
-          <div class="grid grid-cols-2 gap-2.5">
-            {#each Object.values(THEMES) as th}
-              <button 
-                type="button"
-                class="flex items-center space-x-2.5 p-2.5 rounded-xl border text-left cursor-pointer transition-all active:scale-95"
-                class:ring-2={chatState.themeKey === th.id}
-                class:ring-[#0084ff]={chatState.themeKey === th.id}
-                class:border-[#3a3b3c]={chatState.isDarkMode}
-                class:border-gray-200={!chatState.isDarkMode}
-                onclick={() => { chatState.themeKey = th.id; }}
-              >
-                <div class="w-6 h-6 rounded-full shadow-xs shrink-0" style="background: {th.primary};"></div>
-                <span class="font-semibold text-[13px] truncate">{th.name}</span>
-                {#if chatState.themeKey === th.id}
-                  <Check size={16} class="text-[#0084ff] ml-auto shrink-0" />
-                {/if}
-              </button>
-            {/each}
+        {#if chatState.currentApp === 'messenger' && conv}
+          <!-- Chat Bubble Color Theme (Messenger) -->
+          <div class="space-y-2">
+            <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider">Chủ đề màu bong bóng (Messenger)</span>
+            <div class="grid grid-cols-2 gap-2">
+              {#each Object.values(THEMES) as th}
+                <button 
+                  type="button" 
+                  class="flex items-center space-x-2.5 p-2.5 rounded-xl border text-left cursor-pointer transition-all {conv.themeKey === th.id ? (chatState.isDarkMode ? 'border-[#0084ff] bg-blue-950/40' : 'border-[#0084ff] bg-blue-50') : (chatState.isDarkMode ? 'border-[#3a3b3c]' : 'border-gray-200')}"
+                  onclick={() => { conv.themeKey = th.id; }}
+                >
+                  <span class="w-5 h-5 rounded-full shadow-xs shrink-0" style="background-color: {th.primary};"></span>
+                  <span class="text-[13px] font-semibold">{th.name}</span>
+                </button>
+              {/each}
+            </div>
           </div>
-        </div>
+        {/if}
 
       {:else if activeTab === 'ios'}
-        <!-- iOS Status Bar Toggle -->
-        <div class="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-gray-800">
-          <div>
-            <span class="font-semibold block">Thanh Status Bar iPhone</span>
-            <span class="text-xs text-gray-400">Ẩn nếu dùng PWA full màn hình trên iPhone</span>
-          </div>
-          <input 
-            type="checkbox" 
-            bind:checked={chatState.showIosStatusBar} 
-            class="w-5 h-5 accent-[#0084ff] rounded cursor-pointer"
-          />
-        </div>
-
-        <!-- Dynamic Island Toggle -->
-        <div class="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-gray-800">
-          <div>
-            <span class="font-semibold block">Dynamic Island (Viên thuốc đen)</span>
-            <span class="text-xs text-gray-400">Tắt để ảnh chụp sạch 100% như phím cứng iPhone thật</span>
-          </div>
-          <input 
-            type="checkbox" 
-            bind:checked={chatState.showDynamicIsland} 
-            class="w-5 h-5 accent-[#0084ff] rounded cursor-pointer"
-          />
-        </div>
-
-        <!-- Home Bar Toggle -->
-        <div class="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-gray-800">
-          <span class="font-semibold">Thanh gạch đáy (Home Bar)</span>
-          <input 
-            type="checkbox" 
-            bind:checked={chatState.showHomeBar} 
-            class="w-5 h-5 accent-[#0084ff] rounded cursor-pointer"
-          />
-        </div>
-
-        <!-- Time Settings -->
+        <!-- Time setting -->
         <div class="space-y-1.5">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Đồng hồ iPhone</span>
+            <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider">Giờ trên thanh trạng thái</span>
             <button 
               type="button" 
-              class="text-xs text-[#0084ff] font-semibold underline cursor-pointer"
+              class="text-xs text-[#0084ff] font-semibold hover:underline cursor-pointer"
               onclick={syncCurrentTime}
             >
-              Lấy giờ thực tế
+              Lấy giờ hiện tại
             </button>
           </div>
           <input 
             type="text" 
             bind:value={chatState.currentTime} 
-            class="w-full px-3.5 py-2 rounded-xl border outline-none font-medium"
+            placeholder="09:41"
+            class="w-full px-3.5 py-2 rounded-xl border outline-none font-medium text-[16px]"
             class:bg-[#2a2a2a]={chatState.isDarkMode}
             class:border-[#3a3b3c]={chatState.isDarkMode}
             class:bg-gray-50={!chatState.isDarkMode}
@@ -288,53 +276,58 @@
           />
         </div>
 
-        <!-- Battery Level Slider -->
+        <!-- Battery level slider -->
         <div class="space-y-1.5">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Dung lượng Pin ({chatState.batteryLevel}%)</span>
-            <label class="flex items-center space-x-1 text-xs cursor-pointer">
-              <input type="checkbox" bind:checked={chatState.isCharging} class="accent-yellow-400" />
-              <span>Đang sạc ⚡</span>
-            </label>
+            <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider">Phần trăm Pin</span>
+            <span class="text-xs font-bold">{chatState.batteryLevel}%</span>
           </div>
           <input 
             type="range" 
             min="1" 
             max="100" 
             bind:value={chatState.batteryLevel} 
-            class="w-full accent-[#0084ff] cursor-pointer"
+            class="w-full accent-[#34c759] cursor-pointer"
           />
         </div>
 
-        <!-- Signal & Network -->
-        <div class="grid grid-cols-2 gap-3 pt-2">
-          <div>
-            <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Cột sóng ({chatState.signalBars}/4)</span>
-            <input 
-              type="range" 
-              min="0" 
-              max="4" 
-              bind:value={chatState.signalBars} 
-              class="w-full accent-[#0084ff] cursor-pointer"
-            />
+        <!-- Cellular Type -->
+        <div class="space-y-1.5">
+          <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider">Kiểu mạng di động</span>
+          <div class="flex space-x-2">
+            {#each ['5G', '4G', 'LTE', '3G'] as net}
+              <button 
+                type="button" 
+                class="flex-1 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition-all"
+                class:bg-[#0084ff]={chatState.cellularType === net}
+                class:text-white={chatState.cellularType === net}
+                class:border-[#0084ff]={chatState.cellularType === net}
+                class:border-gray-200={chatState.cellularType !== net && !chatState.isDarkMode}
+                class:border-[#3a3b3c]={chatState.cellularType !== net && chatState.isDarkMode}
+                onclick={() => { chatState.cellularType = net; }}
+              >
+                {net}
+              </button>
+            {/each}
           </div>
+        </div>
 
+        <!-- Dynamic Island Toggle -->
+        <div class="flex items-center justify-between p-3 rounded-2xl border"
+             class:bg-[#242526]={chatState.isDarkMode}
+             class:border-[#3a3b3c]={chatState.isDarkMode}
+             class:bg-gray-50={!chatState.isDarkMode}
+             class:border-gray-200={!chatState.isDarkMode}
+        >
           <div>
-            <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Loại mạng</span>
-            <select 
-              bind:value={chatState.cellularType} 
-              class="w-full px-3 py-1.5 rounded-xl border outline-none font-medium"
-              class:bg-[#2a2a2a]={chatState.isDarkMode}
-              class:border-[#3a3b3c]={chatState.isDarkMode}
-              class:bg-gray-50={!chatState.isDarkMode}
-              class:border-gray-200={!chatState.isDarkMode}
-            >
-              <option value="5G">5G</option>
-              <option value="LTE">LTE</option>
-              <option value="4G">4G</option>
-              <option value="3G">3G</option>
-            </select>
+            <span class="font-semibold block text-[13.5px]">Đảo động (Dynamic Island)</span>
+            <span class="text-xs text-gray-400">Tắt theo mặc định để ảnh chụp màn hình sạch như phím cứng iPhone</span>
           </div>
+          <input 
+            type="checkbox" 
+            bind:checked={chatState.showDynamicIsland} 
+            class="w-5 h-5 accent-[#0084ff] rounded cursor-pointer"
+          />
         </div>
       {/if}
     </div>
@@ -346,12 +339,11 @@
     >
       <button 
         type="button" 
-        class="w-full py-2.5 rounded-xl bg-[#0084ff] hover:bg-[#0073e6] text-white font-bold shadow-md active:scale-98 transition-all cursor-pointer"
+        class="px-5 py-2 rounded-xl bg-[#0084ff] text-white font-bold text-[14px] hover:bg-[#0073e6] active:scale-95 transition-all cursor-pointer shadow-md"
         onclick={closeModal}
       >
-        Áp dụng & Đóng
+        Lưu & Đóng
       </button>
     </div>
   </div>
 </div>
-

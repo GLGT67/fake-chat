@@ -1,7 +1,12 @@
 <script>
-  import { chatState, getActiveZaloConversation, addZaloMessage, toggleZaloHeart } from '../../state.svelte.js';
+  import { 
+    chatState, 
+    getActiveZaloConversation, 
+    addZaloMessage, 
+    toggleZaloHeart 
+  } from '../../state.svelte.js';
   import ZaloIcon from '../ZaloIcon.svelte';
-  import { Phone, MessageSquare, Send, CheckCheck } from '@lucide/svelte';
+  import { Phone, MessageSquare, Send, CheckCheck, BadgeCheck, X, Reply } from '@lucide/svelte';
 
   const conv = $derived(getActiveZaloConversation());
   let inputText = $state('');
@@ -19,6 +24,12 @@
     setTimeout(scrollToBottom, 60);
   });
 
+  function resetViewport() {
+    setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }, 50);
+  }
+
   function handleBack() {
     chatState.zaloScreen = 'zalo_chats_list';
   }
@@ -31,6 +42,7 @@
       sender: chatState.activeSender
     });
     inputText = '';
+    resetViewport();
   }
 
   function handleKeyDown(e) {
@@ -55,6 +67,7 @@
           content: 'Hình ảnh',
           sender: chatState.activeSender
         });
+        resetViewport();
       };
       reader.readAsDataURL(file);
     }
@@ -77,6 +90,7 @@
       voiceDuration: '0:14',
       sender: chatState.activeSender
     });
+    resetViewport();
   }
 
   function startCall(type) {
@@ -84,6 +98,15 @@
     chatState.callStatus = 'incoming';
     chatState.callTimer = 0;
     chatState.activeModal = 'call';
+  }
+
+  function openActionModal(msg) {
+    chatState.selectedActionMessage = msg;
+    chatState.activeModal = 'message_action';
+  }
+
+  function cancelReply() {
+    chatState.replyingToMessage = null;
   }
 </script>
 
@@ -110,16 +133,26 @@
         <ZaloIcon name="back" size={24} class="text-white" />
       </button>
 
-      <div class="flex flex-col min-w-0">
-        <h2 class="text-[17px] font-semibold text-white leading-tight truncate">
-          {conv.name}
-        </h2>
+      <button 
+        type="button"
+        class="flex flex-col min-w-0 text-left cursor-pointer active:opacity-80"
+        onclick={() => { chatState.activeModal = 'profile'; }}
+        title="Nhấn để đổi tên, ảnh, tích xanh và trạng thái"
+      >
+        <div class="flex items-center space-x-1.5">
+          <h2 class="text-[17px] font-semibold text-white leading-tight truncate">
+            {conv.name}
+          </h2>
+          {#if conv.hasVerifiedBadge}
+            <BadgeCheck size={16} class="text-[#0068ff] shrink-0 fill-white text-[#0068ff]" />
+          {/if}
+        </div>
         {#if conv.statusText}
           <span class="text-[11.5px] text-white/80 leading-tight truncate">
             {conv.statusText}
           </span>
         {/if}
-      </div>
+      </button>
     </div>
 
     <!-- Right Actions: Voice Call, Video Call, 3-Line Menu -->
@@ -158,6 +191,28 @@
     bind:this={chatBodyRef}
     class="flex-1 overflow-y-auto px-3.5 py-3 space-y-3 ios-scroll no-scrollbar bg-[#eef0f4]"
   >
+    <!-- Empty State Greeting if no messages -->
+    {#if conv.messages.length === 0}
+      <div class="text-center py-8 select-none">
+        <img 
+          src={conv.avatar} 
+          alt={conv.name} 
+          class="w-16 h-16 rounded-full mx-auto object-cover shadow-sm mb-2 border border-black/5"
+        />
+        <div class="flex items-center justify-center space-x-1">
+          <h3 class="font-bold text-[17px] text-gray-800 leading-tight">
+            {conv.name}
+          </h3>
+          {#if conv.hasVerifiedBadge}
+            <BadgeCheck size={16} class="text-[#0068ff] shrink-0 fill-[#0068ff] text-white" />
+          {/if}
+        </div>
+        <p class="text-xs text-gray-500 mt-1">
+          {conv.statusText || 'Bắt đầu cuộc trò chuyện Zalo mới'}
+        </p>
+      </div>
+    {/if}
+
     {#each conv.messages as msg, i (msg.id)}
       {@const isThem = msg.sender === 'them'}
       <div 
@@ -177,13 +232,29 @@
             </div>
           {/if}
 
-          <!-- Message Container -->
-          <div class="relative flex flex-col" class:items-end={!isThem} class:items-start={isThem}>
+          <!-- Message Container (Tap to open full actions) -->
+          <div 
+            class="relative flex flex-col cursor-pointer active:scale-[0.98] transition-transform" 
+            class:items-end={!isThem} 
+            class:items-start={isThem}
+            onclick={() => openActionModal(msg)}
+            role="button"
+            tabindex="0"
+            onkeydown={(e) => e.key === 'Enter' && openActionModal(msg)}
+            title="Nhấn để tương tác: Thả tim, Trả lời, Sửa, Đổi người gửi, Xóa"
+          >
             {#if msg.type === 'text'}
               <!-- Standard Text Bubble -->
               <div 
                 class="px-3.5 py-2 rounded-2xl text-[15px] text-black leading-relaxed break-words shadow-2xs tracking-tight {isThem ? 'bg-white' : 'bg-[#d5f1ff]'}"
               >
+                <!-- Quote text inside text bubble if any -->
+                {#if msg.quoteText}
+                  <div class="mb-1.5 pl-2 border-l-3 border-[#0068ff] text-left">
+                    <span class="block text-[11px] font-bold text-gray-700">{msg.quoteSender || 'Người gửi'}</span>
+                    <p class="text-[11px] text-gray-500 truncate">{msg.quoteText}</p>
+                  </div>
+                {/if}
                 {msg.content}
               </div>
 
@@ -245,21 +316,21 @@
               </div>
             {/if}
 
-            <!-- Attached Heart Reaction Pill (White circle with outline heart) -->
+            <!-- Attached Heart Reaction Pill (White circle with heart) -->
             {#if msg.hasHeart}
               <button 
                 type="button" 
                 class="absolute -bottom-2.5 {isThem ? 'right-0' : 'left-0'} w-6 h-6 bg-white rounded-full shadow-md border border-gray-200 flex items-center justify-center text-red-500 cursor-pointer active:scale-125 transition-transform"
-                onclick={() => toggleZaloHeart(msg.id)}
+                onclick={(e) => { e.stopPropagation(); toggleZaloHeart(msg.id); }}
                 title="Bỏ thích"
               >
-                <span class="text-[12px] leading-none">🤍</span>
+                <span class="text-[12px] leading-none">❤️</span>
               </button>
             {:else}
               <button 
                 type="button" 
-                class="opacity-0 group-hover:opacity-100 absolute -bottom-2 {isThem ? 'right-0' : 'left-0'} w-5 h-5 bg-white/80 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-opacity cursor-pointer shadow-xs"
-                onclick={() => toggleZaloHeart(msg.id)}
+                class="opacity-60 hover:opacity-100 absolute -bottom-2 {isThem ? 'right-0' : 'left-0'} w-5 h-5 bg-white/90 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-all cursor-pointer shadow-xs border border-gray-100"
+                onclick={(e) => { e.stopPropagation(); toggleZaloHeart(msg.id); }}
                 title="Thả tim Zalo"
               >
                 <span class="text-[10px]">🤍</span>
@@ -286,6 +357,31 @@
 
   <!-- Bottom Input Bar (1:1 from sample image 2) -->
   <div class="w-full flex flex-col bg-white border-t border-gray-200 shrink-0 z-20">
+    <!-- Active Quote Reply Preview Banner for Zalo -->
+    {#if chatState.replyingToMessage}
+      <div class="flex items-center justify-between px-3.5 py-1.5 bg-gray-50 border-b border-gray-200 text-[12px] animate-in fade-in duration-150">
+        <div class="flex items-center space-x-2 min-w-0 flex-1 border-l-3 border-[#0068ff] pl-2">
+          <Reply size={14} class="text-[#0068ff] shrink-0" />
+          <div class="truncate">
+            <span class="font-bold text-gray-800">
+              Đang trả lời {chatState.replyingToMessage.sender === 'me' ? 'chính bạn' : conv.name}:
+            </span>
+            <span class="text-gray-500 italic ml-1 truncate">
+              {chatState.replyingToMessage.content || 'Tin nhắn thoại / Hình ảnh'}
+            </span>
+          </div>
+        </div>
+        <button 
+          type="button" 
+          class="w-5 h-5 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-pointer active:scale-90 ml-2 shrink-0"
+          onclick={cancelReply}
+          title="Hủy trả lời"
+        >
+          <X size={14} />
+        </button>
+      </div>
+    {/if}
+
     <!-- Quick Switcher Bar (Hidden in snapshot mode) -->
     {#if !chatState.isSnapshotMode}
       <div class="flex items-center justify-between px-3.5 py-1 text-[11px] font-semibold bg-gray-50 border-b border-gray-100">
@@ -325,13 +421,14 @@
         <ZaloIcon name="open_icon" size={26} class="text-gray-700" />
       </button>
 
-      <!-- Center: Text Input Field -->
+      <!-- Center: Text Input Field (16px to stop iOS auto-zoom) -->
       <input 
         type="text" 
         placeholder="Tin nhắn"
         bind:value={inputText}
         onkeydown={handleKeyDown}
-        class="flex-1 bg-transparent text-[15.5px] outline-none text-black placeholder-gray-400 font-normal py-1"
+        onblur={resetViewport}
+        class="flex-1 bg-transparent text-[16px] outline-none text-black placeholder-gray-400 font-normal py-1"
       />
 
       <!-- Right Action Icons: 3 Dots, Mic, Image, or Send -->

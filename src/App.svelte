@@ -16,6 +16,7 @@
   import ZaloMainScreen from "./lib/zalo/ZaloMainScreen.svelte";
   import ZaloChatScreen from "./lib/zalo/ZaloChatScreen.svelte";
   import ZaloCreateContactScreen from "./lib/zalo/ZaloCreateContactScreen.svelte";
+  import MessageActionModal from "./lib/MessageActionModal.svelte";
 
   const conv = $derived(getActiveConversation());
   /** @type {HTMLDivElement | undefined} */
@@ -139,7 +140,9 @@
     <IosHomeBar />
 
     <!-- Interactive Overlays & Modals -->
-    {#if chatState.activeModal === "react"}
+    {#if chatState.activeModal === "message_action"}
+      <MessageActionModal />
+    {:else if chatState.activeModal === "react"}
       <ReactBottomSheet />
     {:else if chatState.activeModal === "profile"}
       <ProfileModal />

@@ -8,7 +8,7 @@
   const filteredConversations = $derived(
     chatState.zaloConversations.filter(c => 
       c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+      (c.lastMessage || '').toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
 
@@ -114,7 +114,7 @@
 
           <div class="flex items-center justify-between">
             <p class="text-[13.5px] text-gray-500 truncate font-normal leading-normal">
-              {c.lastMessage}
+              {c.lastMessage || 'Chưa có tin nhắn'}
             </p>
 
             <!-- Unread Badge -->
