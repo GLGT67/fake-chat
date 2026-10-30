@@ -232,123 +232,120 @@
             </div>
           {/if}
 
-          <!-- Message Container (Tap to open full actions) -->
-          <div 
-            class="relative flex flex-col cursor-pointer active:scale-[0.98] transition-transform" 
-            class:items-end={!isThem} 
-            class:items-start={isThem}
-            onclick={() => openActionModal(msg)}
-            role="button"
-            tabindex="0"
-            onkeydown={(e) => e.key === 'Enter' && openActionModal(msg)}
-            title="Nhấn để tương tác: Thả tim, Trả lời, Sửa, Đổi người gửi, Xóa"
-          >
-            {#if msg.type === 'text'}
-              <!-- Standard Text Bubble -->
-              <div 
-                class="px-3.5 py-2 rounded-2xl text-[15px] text-black leading-relaxed break-words shadow-2xs tracking-tight {isThem ? 'bg-white' : 'bg-[#d5f1ff]'}"
-              >
-                <!-- Quote text inside text bubble if any -->
-                {#if msg.quoteText}
-                  <div class="mb-1.5 pl-2 border-l-3 border-[#0068ff] text-left">
-                    <span class="block text-[11px] font-bold text-gray-700">{msg.quoteSender || 'Người gửi'}</span>
-                    <p class="text-[11px] text-gray-500 truncate">{msg.quoteText}</p>
+          <!-- Bubble and Status Stack -->
+          <div class="flex flex-col" class:items-end={!isThem} class:items-start={isThem}>
+            <!-- Message Bubble Wrapper with its own relative positioning -->
+            <div 
+              class="relative cursor-pointer active:scale-[0.98] transition-transform max-w-full"
+              onclick={() => openActionModal(msg)}
+              role="button"
+              tabindex="0"
+              onkeydown={(e) => e.key === 'Enter' && openActionModal(msg)}
+              title="Nhấn để tùy chọn tin nhắn"
+            >
+              {#if msg.type === 'text'}
+                <!-- Standard Text Bubble -->
+                <div 
+                  class="px-3.5 py-2 rounded-2xl text-[15px] text-black leading-relaxed break-words shadow-2xs tracking-tight {isThem ? 'bg-white' : 'bg-[#d5f1ff]'}"
+                >
+                  <!-- Quote text inside text bubble if any -->
+                  {#if msg.quoteText}
+                    <div class="mb-1.5 pl-2 border-l-3 border-[#0068ff] text-left">
+                      <span class="block text-[11px] font-bold text-gray-700">{msg.quoteSender || 'Người gửi'}</span>
+                      <p class="text-[11px] text-gray-500 truncate">{msg.quoteText}</p>
+                    </div>
+                  {/if}
+                  {msg.content}
+                </div>
+
+              {:else if msg.type === 'contact_card'}
+                <!-- Zalo Contact Card (1:1 from sample image 2) -->
+                <div class="w-[240px] rounded-2xl overflow-hidden shadow-2xs border border-blue-200">
+                  <!-- Top Blue Header -->
+                  <div class="bg-gradient-to-r from-[#0068ff] to-[#008fe5] p-3 flex items-center space-x-2.5 text-white">
+                    <img 
+                      src={msg.cardAvatar || conv.avatar} 
+                      alt="Contact" 
+                      class="w-10 h-10 rounded-full object-cover border-2 border-white/40 shadow-xs"
+                    />
+                    <span class="font-bold text-[15px] truncate text-white">{msg.cardName || 'Danh thiếp'}</span>
                   </div>
-                {/if}
-                {msg.content}
-              </div>
-
-            {:else if msg.type === 'contact_card'}
-              <!-- Zalo Contact Card (1:1 from sample image 2) -->
-              <div class="w-[240px] rounded-2xl overflow-hidden shadow-2xs border border-blue-200">
-                <!-- Top Blue Header -->
-                <div class="bg-gradient-to-r from-[#0068ff] to-[#008fe5] p-3 flex items-center space-x-2.5 text-white">
-                  <img 
-                    src={msg.cardAvatar || conv.avatar} 
-                    alt="Contact" 
-                    class="w-10 h-10 rounded-full object-cover border-2 border-white/40 shadow-xs"
-                  />
-                  <span class="font-bold text-[15px] truncate text-white">{msg.cardName || 'Danh thiếp'}</span>
+                  <!-- Bottom Action Split -->
+                  <div class="bg-white flex items-center divide-x divide-gray-100 text-[#0068ff] font-semibold text-[13.5px]">
+                    <button type="button" class="flex-1 py-2 text-center hover:bg-gray-50 active:bg-gray-100 cursor-pointer">
+                      Gọi điện
+                    </button>
+                    <button type="button" class="flex-1 py-2 text-center hover:bg-gray-50 active:bg-gray-100 cursor-pointer">
+                      Nhắn tin
+                    </button>
+                  </div>
                 </div>
-                <!-- Bottom Action Split -->
-                <div class="bg-white flex items-center divide-x divide-gray-100 text-[#0068ff] font-semibold text-[13.5px]">
-                  <button type="button" class="flex-1 py-2 text-center hover:bg-gray-50 active:bg-gray-100 cursor-pointer">
-                    Gọi điện
-                  </button>
-                  <button type="button" class="flex-1 py-2 text-center hover:bg-gray-50 active:bg-gray-100 cursor-pointer">
-                    Nhắn tin
-                  </button>
+
+              {:else if msg.type === 'reply_quote'}
+                <!-- Zalo Reply Quote Bubble (1:1 from sample image 2) -->
+                <div class="p-3 rounded-2xl bg-white shadow-2xs max-w-[240px] space-y-1.5 border border-gray-100">
+                  <!-- Quoted Block with blue vertical bar -->
+                  <div class="pl-2.5 border-l-3 border-[#0068ff] text-left">
+                    <span class="block text-[13px] font-bold text-gray-800">{msg.quoteSender || 'Người gửi'}</span>
+                    <p class="text-[12px] text-gray-500 truncate">{msg.quoteText || 'Nội dung trích dẫn'}</p>
+                  </div>
+                  <!-- Main reply text -->
+                  <p class="text-[15px] font-normal text-black pt-0.5 leading-snug">{msg.content}</p>
                 </div>
-              </div>
 
-            {:else if msg.type === 'reply_quote'}
-              <!-- Zalo Reply Quote Bubble (1:1 from sample image 2) -->
-              <div class="p-3 rounded-2xl bg-white shadow-2xs max-w-[240px] space-y-1.5 border border-gray-100">
-                <!-- Quoted Block with blue vertical bar -->
-                <div class="pl-2.5 border-l-3 border-[#0068ff] text-left">
-                  <span class="block text-[13px] font-bold text-gray-800">{msg.quoteSender || 'Người gửi'}</span>
-                  <p class="text-[12px] text-gray-500 truncate">{msg.quoteText || 'Nội dung trích dẫn'}</p>
+              {:else if msg.type === 'image'}
+                <!-- Image Attachment -->
+                <div class="rounded-2xl overflow-hidden shadow-2xs max-w-[220px] border border-gray-200">
+                  <img src={msg.imageUri || msg.content} alt="Ảnh Zalo" class="w-full h-auto object-cover max-h-[280px]" />
                 </div>
-                <!-- Main reply text -->
-                <p class="text-[15px] font-normal text-black pt-0.5 leading-snug">{msg.content}</p>
-              </div>
 
-            {:else if msg.type === 'image'}
-              <!-- Image Attachment -->
-              <div class="rounded-2xl overflow-hidden shadow-2xs max-w-[220px] border border-gray-200">
-                <img src={msg.imageUri || msg.content} alt="Ảnh Zalo" class="w-full h-auto object-cover max-h-[280px]" />
-              </div>
-
-            {:else if msg.type === 'voice'}
-              <!-- Voice Note Waveform -->
-              <div 
-                class="px-3.5 py-2 rounded-2xl flex items-center space-x-2 min-w-[150px] shadow-2xs"
-                class:bg-white={isThem}
-                class:bg-[#d5f1ff]={!isThem}
-              >
-                <div class="w-6 h-6 rounded-full bg-[#0068ff] text-white flex items-center justify-center text-xs">▶</div>
-                <div class="flex-1 flex items-center space-x-0.5 h-4">
-                  {#each [4, 10, 16, 8, 14, 18, 6, 12, 10, 14] as h}
-                    <div class="w-[2px] bg-[#0068ff] rounded-full" style="height: {h}px;"></div>
-                  {/each}
+              {:else if msg.type === 'voice'}
+                <!-- Voice Note Waveform -->
+                <div 
+                  class="px-3.5 py-2 rounded-2xl flex items-center space-x-2 min-w-[150px] shadow-2xs"
+                  class:bg-white={isThem}
+                  class:bg-[#d5f1ff]={!isThem}
+                >
+                  <div class="w-6 h-6 rounded-full bg-[#0068ff] text-white flex items-center justify-center text-xs">▶</div>
+                  <div class="flex-1 flex items-center space-x-0.5 h-4">
+                    {#each [4, 10, 16, 8, 14, 18, 6, 12, 10, 14] as h}
+                      <div class="w-[2px] bg-[#0068ff] rounded-full" style="height: {h}px;"></div>
+                    {/each}
+                  </div>
+                  <span class="text-xs text-gray-500 font-medium">{msg.voiceDuration || '0:14'}</span>
                 </div>
-                <span class="text-xs text-gray-500 font-medium">{msg.voiceDuration || '0:14'}</span>
-              </div>
-            {/if}
+              {/if}
 
-            <!-- Attached Heart Reaction Pill (White circle with heart) -->
-            {#if msg.hasHeart}
-              <button 
-                type="button" 
-                class="absolute -bottom-2.5 {isThem ? 'right-0' : 'left-0'} w-6 h-6 bg-white rounded-full shadow-md border border-gray-200 flex items-center justify-center text-red-500 cursor-pointer active:scale-125 transition-transform"
-                onclick={(e) => { e.stopPropagation(); toggleZaloHeart(msg.id); }}
-                title="Bỏ thích"
-              >
-                <span class="text-[12px] leading-none">❤️</span>
-              </button>
-            {:else}
-              <button 
-                type="button" 
-                class="opacity-60 hover:opacity-100 absolute -bottom-2 {isThem ? 'right-0' : 'left-0'} w-5 h-5 bg-white/90 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-all cursor-pointer shadow-xs border border-gray-100"
-                onclick={(e) => { e.stopPropagation(); toggleZaloHeart(msg.id); }}
-                title="Thả tim Zalo"
-              >
-                <span class="text-[10px]">🤍</span>
-              </button>
-            {/if}
+              <!-- Attached Heart Reaction Pill (White circle with heart) ONLY when msg.hasHeart is true -->
+              {#if msg.hasHeart}
+                <button 
+                  type="button" 
+                  class="absolute -bottom-2.5 {isThem ? '-right-1.5' : '-left-1.5'} w-6 h-6 bg-white rounded-full shadow-md border border-gray-200 flex items-center justify-center text-red-500 cursor-pointer active:scale-125 transition-transform z-10"
+                  onclick={(e) => { e.stopPropagation(); toggleZaloHeart(msg.id); }}
+                  title="Bỏ thích"
+                >
+                  <span class="text-[12px] leading-none">❤️</span>
+                </button>
+              {/if}
+            </div>
 
-            <!-- Timestamp underneath (Zalo Style) -->
-            <span class="text-[11px] text-gray-400 mt-0.5 px-1 font-normal">
-              {msg.timestamp}
-            </span>
+            <!-- Timestamp and Status Pill: Completely separated underneath, no emoji overlap! -->
+            <div 
+              class="flex items-center space-x-1.5 px-1 select-none"
+              class:mt-2={msg.hasHeart}
+              class:mt-0.5={!msg.hasHeart}
+            >
+              <span class="text-[11px] text-gray-400 font-normal">
+                {msg.timestamp}
+              </span>
 
-            <!-- Status Pill for Sender (e.g. '✓✓ Đã nhận') -->
-            {#if !isThem && i === conv.messages.length - 1}
-              <div class="mt-0.5 px-2 py-0.5 bg-[#d8e0ea] rounded-full flex items-center space-x-1 text-[10px] text-gray-600 font-medium shadow-2xs">
-                <CheckCheck size={12} strokeWidth={2.5} class="text-gray-500" />
-                <span>{msg.status === 'seen' ? 'Đã xem' : 'Đã nhận'}</span>
-              </div>
-            {/if}
+              {#if !isThem && i === conv.messages.length - 1}
+                <div class="px-2 py-0.5 bg-[#d8e0ea] rounded-full flex items-center space-x-1 text-[10px] text-gray-600 font-medium shadow-2xs">
+                  <CheckCheck size={12} strokeWidth={2.5} class="text-gray-500" />
+                  <span>{msg.status === 'seen' ? 'Đã xem' : 'Đã nhận'}</span>
+                </div>
+              {/if}
+            </div>
           </div>
         </div>
       </div>

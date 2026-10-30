@@ -181,28 +181,20 @@
         {#if message.react}
           <button 
             type="button" 
-            class="absolute -bottom-2 {message.sender === 'me' ? 'left-1' : 'right-1'} bg-white dark:bg-[#242526] rounded-full px-1.5 py-0.5 shadow-md border border-gray-200 dark:border-gray-700 flex items-center space-x-0.5 active:scale-125 transition-transform cursor-pointer"
+            class="absolute -bottom-2.5 {message.sender === 'me' ? '-left-1' : '-right-1'} bg-white dark:bg-[#242526] rounded-full px-1.5 py-0.5 shadow-md border border-gray-200 dark:border-gray-700 flex items-center space-x-0.5 active:scale-125 transition-transform cursor-pointer z-10"
             onclick={openActionModal}
           >
             <img src="./reacts/ic_react_{message.react}.png" alt={message.react} class="w-4 h-4 object-contain" />
           </button>
         {/if}
       </div>
-
-      <!-- Quick Action Trigger Button on Hover / Mobile tap -->
-      <button 
-        type="button" 
-        class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-yellow-500 transition-opacity cursor-pointer shrink-0"
-        onclick={openActionModal}
-        title="Tương tác tin nhắn"
-      >
-        😊
-      </button>
     </div>
 
     <!-- Subtitle: Timestamp & Status -->
     <div 
-      class="text-[11px] px-1 mt-0.5 flex items-center space-x-1 transition-opacity duration-200 select-none"
+      class="text-[11px] px-1 flex items-center space-x-1 transition-opacity duration-200 select-none"
+      class:mt-2={message.react}
+      class:mt-0.5={!message.react}
       class:text-gray-400={chatState.isDarkMode}
       class:text-gray-500={!chatState.isDarkMode}
     >

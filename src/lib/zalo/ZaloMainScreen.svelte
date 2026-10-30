@@ -1,7 +1,7 @@
 <script>
-  import { chatState, selectZaloConversation } from '../../state.svelte.js';
+  import { chatState, selectZaloConversation, deleteZaloConversation } from '../../state.svelte.js';
   import ZaloIcon from '../ZaloIcon.svelte';
-  import { ChevronRight, Pin } from '@lucide/svelte';
+  import { ChevronRight, Pin, Trash2 } from '@lucide/svelte';
 
   let searchQuery = $state('');
 
@@ -73,64 +73,81 @@
 
     <!-- Conversations List (1:1 identical to sample image 1) -->
     {#each filteredConversations as c (c.id)}
-      <button 
-        type="button" 
-        class="w-full flex items-center px-4 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors cursor-pointer text-left border-0 bg-transparent"
-        onclick={() => selectZaloConversation(c.id)}
-      >
-        <!-- Avatar with badges -->
-        <div class="relative w-13 h-13 shrink-0 mr-3">
-          <img 
-            src={c.avatar} 
-            alt={c.name} 
-            class="w-full h-full rounded-full object-cover shadow-2xs border border-gray-100"
-          />
-          {#if c.hasVerifiedBadge}
-            <span class="absolute bottom-0 right-0 w-4 h-4 bg-[#ff9800] text-white rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-xs">
-              ✓
-            </span>
-          {:else if c.isOnline}
-            <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#00c853] rounded-full border-2 border-white shadow-xs"></span>
-          {/if}
-        </div>
-
-        <!-- Name & Message preview -->
-        <div class="flex-1 min-w-0 pr-2">
-          <div class="flex items-center justify-between mb-0.5">
-            <h3 class="text-[15.5px] font-semibold text-gray-900 truncate">
-              {c.name}
-            </h3>
-            
-            <!-- Time & Pin -->
-            <div class="flex items-center space-x-1 shrink-0 ml-2">
-              {#if c.isPinned}
-                <Pin size={13} class="text-gray-400 rotate-45" />
-              {/if}
-              <span class="text-[12px] text-gray-400 font-normal">
-                {c.lastTime}
+      <div class="w-full flex items-center px-4 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left border-0 bg-transparent group">
+        <button 
+          type="button" 
+          class="flex items-center flex-1 min-w-0 cursor-pointer text-left bg-transparent border-0 p-0"
+          onclick={() => selectZaloConversation(c.id)}
+        >
+          <!-- Avatar with badges -->
+          <div class="relative w-13 h-13 shrink-0 mr-3">
+            <img 
+              src={c.avatar} 
+              alt={c.name} 
+              class="w-full h-full rounded-full object-cover shadow-2xs border border-gray-100"
+            />
+            {#if c.hasVerifiedBadge}
+              <span class="absolute bottom-0 right-0 w-4 h-4 bg-[#ff9800] text-white rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-xs">
+                ✓
               </span>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between">
-            <p class="text-[13.5px] text-gray-500 truncate font-normal leading-normal">
-              {c.lastMessage || 'Chưa có tin nhắn'}
-            </p>
-
-            <!-- Unread Badge -->
-            {#if c.unreadCount > 0}
-              <div class="flex items-center space-x-1 ml-2 shrink-0">
-                {#if c.hasMention}
-                  <span class="w-4 h-4 rounded-full bg-[#0084ff] text-white text-[10px] font-bold flex items-center justify-center">@</span>
-                {/if}
-                <span class="min-w-[18px] h-[18px] px-1 bg-[#ff3b30] text-white text-[11px] font-bold rounded-full flex items-center justify-center shadow-xs">
-                  {c.unreadCount}
-                </span>
-              </div>
+            {:else if c.isOnline}
+              <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#00c853] rounded-full border-2 border-white shadow-xs"></span>
             {/if}
           </div>
-        </div>
-      </button>
+
+          <!-- Name & Message preview -->
+          <div class="flex-1 min-w-0 pr-2">
+            <div class="flex items-center justify-between mb-0.5">
+              <h3 class="text-[15.5px] font-semibold text-gray-900 truncate">
+                {c.name}
+              </h3>
+              
+              <!-- Time & Pin -->
+              <div class="flex items-center space-x-1 shrink-0 ml-2">
+                {#if c.isPinned}
+                  <Pin size={13} class="text-gray-400 rotate-45" />
+                {/if}
+                <span class="text-[12px] text-gray-400 font-normal">
+                  {c.lastTime}
+                </span>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <p class="text-[13.5px] text-gray-500 truncate font-normal leading-normal">
+                {c.lastMessage || 'Chưa có tin nhắn'}
+              </p>
+
+              <!-- Unread Badge -->
+              {#if c.unreadCount > 0}
+                <div class="flex items-center space-x-1 ml-2 shrink-0">
+                  {#if c.hasMention}
+                    <span class="w-4 h-4 rounded-full bg-[#0084ff] text-white text-[10px] font-bold flex items-center justify-center">@</span>
+                  {/if}
+                  <span class="min-w-[18px] h-[18px] px-1 bg-[#ff3b30] text-white text-[11px] font-bold rounded-full flex items-center justify-center shadow-xs">
+                    {c.unreadCount}
+                  </span>
+                </div>
+              {/if}
+            </div>
+          </div>
+        </button>
+
+        <!-- Delete Contact Button -->
+        <button 
+          type="button" 
+          class="p-2 text-gray-400 hover:text-red-500 active:scale-90 transition-all cursor-pointer opacity-30 hover:opacity-100"
+          onclick={(e) => {
+            e.stopPropagation();
+            if (confirm(`Xóa cuộc trò chuyện với "${c.name}"?`)) {
+              deleteZaloConversation(c.id);
+            }
+          }}
+          title="Xóa đoạn chat này"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
     {/each}
   </div>
 
@@ -144,9 +161,11 @@
     >
       <div class="relative">
         <ZaloIcon name="message_main" size={24} class="text-[#0068ff]" />
-        <span class="absolute -top-1.5 -right-3 px-1 py-0.2 bg-[#ff3b30] text-white text-[9px] font-bold rounded-full border border-white">
-          5+
-        </span>
+        {#if filteredConversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0) > 0}
+          <span class="absolute -top-1.5 -right-3 px-1 py-0.2 bg-[#ff3b30] text-white text-[9px] font-bold rounded-full border border-white">
+            {filteredConversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0)}
+          </span>
+        {/if}
       </div>
       <span class="text-[10.5px] font-semibold mt-0.5">Tin nhắn</span>
     </button>

@@ -69,7 +69,7 @@ export const chatState = $state({
   // Active Conversation Info (selected or default)
   activeContactId: "c-1",
 
-  // Contacts / Conversations List for Messenger (All demo messages emptied as requested)
+  // Contacts / Conversations List for Messenger (Clean single conversation)
   conversations: [
     {
       id: "c-1",
@@ -82,32 +82,6 @@ export const chatState = $state({
       unreadCount: 0,
       lastMessage: "",
       lastTime: "Vừa xong",
-      messages: []
-    },
-    {
-      id: "c-2",
-      name: "Nguyễn Thảo My",
-      avatar: DEFAULT_AVATARS[1],
-      isOnline: true,
-      statusText: "Hoạt động 5 phút trước",
-      hasVerifiedBadge: true,
-      themeKey: "ocean",
-      unreadCount: 0,
-      lastMessage: "",
-      lastTime: "08:15",
-      messages: []
-    },
-    {
-      id: "c-3",
-      name: "Đức Nguyễn",
-      avatar: DEFAULT_AVATARS[2],
-      isOnline: false,
-      statusText: "Hoạt động 1 giờ trước",
-      hasVerifiedBadge: false,
-      themeKey: "classic",
-      unreadCount: 0,
-      lastMessage: "",
-      lastTime: "Hôm qua",
       messages: []
     }
   ],
@@ -126,7 +100,7 @@ export const chatState = $state({
   // Active sender in current chat: 'me' | 'them'
   activeSender: "me",
 
-  // Zalo Conversations List (All demo messages emptied as requested)
+  // Zalo Conversations List (Clean single conversation)
   zaloConversations: [
     {
       id: "z-1",
@@ -137,80 +111,6 @@ export const chatState = $state({
       hasVerifiedBadge: false,
       lastMessage: "",
       lastTime: "Vừa xong",
-      unreadCount: 0,
-      messages: []
-    },
-    {
-      id: "z-2",
-      name: "Lỗi đổ đầu chúng toi",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop&crop=faces",
-      statusText: "",
-      isOnline: false,
-      hasVerifiedBadge: false,
-      lastMessage: "",
-      lastTime: "19/10",
-      isPinned: true,
-      unreadCount: 0,
-      messages: []
-    },
-    {
-      id: "z-3",
-      name: "Zalo Bảo Mật",
-      avatar: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop&crop=faces",
-      statusText: "Tài khoản chính thức",
-      hasVerifiedBadge: true,
-      isOnline: true,
-      lastMessage: "",
-      lastTime: "6 giờ",
-      unreadCount: 0,
-      messages: []
-    },
-    {
-      id: "z-4",
-      name: "Nguyễn Thị Hải Ninh",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&crop=faces",
-      statusText: "Truy cập 15 phút trước",
-      hasVerifiedBadge: false,
-      isOnline: false,
-      lastMessage: "",
-      lastTime: "9 giờ",
-      unreadCount: 0,
-      messages: []
-    },
-    {
-      id: "z-5",
-      name: "Thiết kế đồ hoạ",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=faces",
-      statusText: "",
-      hasVerifiedBadge: false,
-      isOnline: true,
-      lastMessage: "",
-      lastTime: "22 giờ",
-      unreadCount: 0,
-      hasMention: true,
-      messages: []
-    },
-    {
-      id: "z-6",
-      name: "Game Data Research",
-      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=300&fit=crop&crop=faces",
-      statusText: "",
-      hasVerifiedBadge: false,
-      isOnline: true,
-      lastMessage: "",
-      lastTime: "T3",
-      unreadCount: 0,
-      messages: []
-    },
-    {
-      id: "z-7",
-      name: "Quyên Xử Lý Nước",
-      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&crop=faces",
-      statusText: "Truy cập 1 giờ trước",
-      hasVerifiedBadge: false,
-      isOnline: false,
-      lastMessage: "",
-      lastTime: "T2",
       unreadCount: 0,
       messages: []
     }
@@ -351,6 +251,24 @@ export function clearCurrentChat() {
 }
 
 export const clearAllMessages = clearCurrentChat;
+
+export function deleteConversation(/** @type {string} */ id) {
+  chatState.conversations = chatState.conversations.filter(c => c.id !== id);
+  if (chatState.conversations.length === 0) {
+    addConversation({ name: "Người liên hệ mới" });
+  } else if (chatState.activeContactId === id) {
+    chatState.activeContactId = chatState.conversations[0].id;
+  }
+}
+
+export function deleteZaloConversation(/** @type {string} */ id) {
+  chatState.zaloConversations = chatState.zaloConversations.filter(c => c.id !== id);
+  if (chatState.zaloConversations.length === 0) {
+    addZaloConversation({ name: "Người liên hệ Zalo mới" });
+  } else if (chatState.zaloActiveContactId === id) {
+    chatState.zaloActiveContactId = chatState.zaloConversations[0].id;
+  }
+}
 
 // --- ZALO HELPERS ---
 export function selectZaloConversation(/** @type {string} */ id) {

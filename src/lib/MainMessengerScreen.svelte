@@ -1,6 +1,7 @@
 <script>
-  import { chatState, selectConversation } from '../state.svelte.js';
+  import { chatState, selectConversation, deleteConversation } from '../state.svelte.js';
   import OriginalIcon from './OriginalIcon.svelte';
+  import { Trash2 } from '@lucide/svelte';
 
   let searchQuery = $state('');
 
@@ -140,53 +141,70 @@
     <!-- Conversation List -->
     <div class="divide-y divide-transparent">
       {#each filteredConversations as c (c.id)}
-        <button 
-          type="button" 
-          class="w-full flex items-center px-4 py-3 cursor-pointer transition-colors active:bg-gray-100 dark:active:bg-gray-800 text-left bg-transparent border-0"
-          onclick={() => selectConversation(c.id)}
-        >
-          <!-- Avatar with Online Dot -->
-          <div class="relative shrink-0 mr-3.5">
-            <img 
-              src={c.avatar} 
-              alt={c.name} 
-              class="w-14 h-14 rounded-full object-cover shadow-2xs"
-            />
-            {#if c.isOnline}
-              <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#31a24c] rounded-full border-2 border-white dark:border-[#18191a]"></span>
-            {/if}
-          </div>
-
-          <!-- Name & Message Preview -->
-          <div class="flex-1 min-w-0 pr-2">
-            <div class="flex items-center justify-between">
-              <h2 
-                class="text-[16px] leading-tight truncate {c.unreadCount > 0 ? 'font-black' : 'font-bold'}"
-                class:text-white={chatState.isDarkMode}
-                class:text-black={!chatState.isDarkMode}
-              >
-                {c.name}
-              </h2>
+        <div class="w-full flex items-center px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group">
+          <button 
+            type="button" 
+            class="flex items-center flex-1 min-w-0 cursor-pointer text-left bg-transparent border-0 p-0"
+            onclick={() => selectConversation(c.id)}
+          >
+            <!-- Avatar with Online Dot -->
+            <div class="relative shrink-0 mr-3.5">
+              <img 
+                src={c.avatar} 
+                alt={c.name} 
+                class="w-14 h-14 rounded-full object-cover shadow-2xs"
+              />
+              {#if c.isOnline}
+                <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#31a24c] rounded-full border-2 border-white dark:border-[#18191a]"></span>
+              {/if}
             </div>
 
-            <div class="flex items-center space-x-1.5 mt-1 text-[13px] text-gray-500 dark:text-gray-400">
-              <p class="truncate flex-1 {c.unreadCount > 0 ? 'font-bold text-black dark:text-white' : ''}">
-                {c.lastMessage}
-              </p>
-              <span class="shrink-0">•</span>
-              <span class="shrink-0 text-[12px]">{c.lastTime}</span>
-            </div>
-          </div>
+            <!-- Name & Message Preview -->
+            <div class="flex-1 min-w-0 pr-2">
+              <div class="flex items-center justify-between">
+                <h2 
+                  class="text-[16px] leading-tight truncate {c.unreadCount > 0 ? 'font-black' : 'font-bold'}"
+                  class:text-white={chatState.isDarkMode}
+                  class:text-black={!chatState.isDarkMode}
+                >
+                  {c.name}
+                </h2>
+              </div>
 
-          <!-- Unread Dot or Delivery Status -->
-          <div class="shrink-0 pl-1">
-            {#if c.unreadCount > 0}
-              <span class="w-3.5 h-3.5 bg-[#0084ff] rounded-full block"></span>
-            {:else}
-              <OriginalIcon name="like" size={14} class="text-[#0084ff] opacity-80" />
-            {/if}
-          </div>
-        </button>
+              <div class="flex items-center space-x-1.5 mt-1 text-[13px] text-gray-500 dark:text-gray-400">
+                <p class="truncate flex-1 {c.unreadCount > 0 ? 'font-bold text-black dark:text-white' : ''}">
+                  {c.lastMessage || 'Chưa có tin nhắn'}
+                </p>
+                <span class="shrink-0">•</span>
+                <span class="shrink-0 text-[12px]">{c.lastTime}</span>
+              </div>
+            </div>
+
+            <!-- Unread Dot or Delivery Status -->
+            <div class="shrink-0 pl-1 pr-2">
+              {#if c.unreadCount > 0}
+                <span class="w-3.5 h-3.5 bg-[#0084ff] rounded-full block"></span>
+              {:else}
+                <OriginalIcon name="like" size={14} class="text-[#0084ff] opacity-80" />
+              {/if}
+            </div>
+          </button>
+
+          <!-- Delete Conversation Button -->
+          <button 
+            type="button" 
+            class="p-2 text-gray-400 hover:text-red-500 active:scale-90 transition-all cursor-pointer opacity-30 hover:opacity-100"
+            onclick={(e) => {
+              e.stopPropagation();
+              if (confirm(`Xóa đoạn chat với "${c.name}"?`)) {
+                deleteConversation(c.id);
+              }
+            }}
+            title="Xóa đoạn chat này"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
       {/each}
     </div>
   </div>
