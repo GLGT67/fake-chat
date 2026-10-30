@@ -23,4 +23,12 @@ dist-ssr
 *.sln
 *.sw?
 
+# Python test & utility scripts
+*.py
+gui_screenshots/
+source/
+*.xapk
+*.sqlite
+
 .github/
+
